@@ -20,12 +20,17 @@ import { LocalAuthGuard } from 'src/seller-auth/local/local-auth.guard';
 import { join } from 'path';
 import { SessionGuard } from 'src/seller-auth/session/session.guard';
 import { JwtAuthGuard } from 'src/seller-auth/jwt/jwt-auth.guard';
+import { SellerAuthService } from 'src/seller-auth/seller-auth.service';
 
 
 
 @Controller('seller')
 export class SellerController {
-  constructor(private readonly sellerService: SellerService) {}
+  constructor(
+    private readonly sellerService: SellerService ,
+    private readonly sellerAuthService : SellerAuthService
+    
+    ) {}
 
   /**
    * 1. user jodi emon kono product search kore .. jeta
@@ -163,7 +168,8 @@ export class SellerController {
 
 
   //3 🔰 get one seller by id 🟢🟢
-  @UseGuards(SessionGuard)// 🔰
+  //@UseGuards(SessionGuard)// 🔰
+  @UseGuards(JwtAuthGuard)
   @Get(':id')// 📃5
   async findOne(@Param('id', ParseIntPipe) id: number): Promise<Seller> {
     return this.sellerService.findOne(id);
@@ -222,11 +228,14 @@ export class SellerController {
   }
 
   // 7 🔰 seller login >> JWT 🟢
-  @UseGuards(JwtAuthGuard)
+  //@UseGuards(JwtAuthGuard)
   @Post('sellerLoginJWT')// 📃2
-  sellerLoginJWT(@Request() req) {
+  sellerLoginJWT( @Body() loginInfo/*@Request() req*/) {
+    console.log("test 1 from seller controller .. no print")
     //return this.sellerService.sellerLoginWithJWT(req);
-    return req.user;
+    return this.sellerAuthService.loginWithJWT(loginInfo);
+    //console.log(loginInfo);
+    //return req.user;
   }
 
 
