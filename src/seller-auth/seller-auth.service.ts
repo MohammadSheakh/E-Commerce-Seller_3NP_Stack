@@ -1,6 +1,8 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { SellerService } from 'src/seller/seller.service';
+
 // for jwt
+import { CookieSerializeOptions, serialize } from 'cookie';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Seller } from 'src/seller/entities/seller.entity';
@@ -71,8 +73,9 @@ export class SellerAuthService {
   }
 
   // loginWithJWT
-  async loginWithJWT(seller: any){
+  async loginWithJWT(seller: any/*, res:any*/){
     //console.log("auth service -> loginWithJWT(seller) => ", seller);
+    console.log("============= seller🟢🟢", seller);
 
     try{
       const user = await this.sellersRepository.findOneOrFail({
@@ -95,11 +98,28 @@ export class SellerAuthService {
             const payload = { sellerEmailAddress: seller.sellerEmailAddress, sub: user.id }; // this seller.id is sellers actual id 
             //console.log("auth service -> loginWithJWT(seller){payload} => ", payload);
             console.log("auth service -> loginWithJWT(seller){return access_token} => ", await this.jwtService.signAsync(payload,{secret : "SECRET"}));
+            
+
+            // Set JWT token in a cookie
+            // const cookieOptions: CookieSerializeOptions = {
+            //   httpOnly: true, // This prevents client-side JavaScript from accessing the cookie
+            //   maxAge: 60 * 60 * 24 * 7, // Cookie will expire in 7 days (adjust as needed)
+            //   sameSite: 'strict', // Ensures the cookie is sent only in a first-party context
+            //   secure: 'production', // Ensures the cookie is only sent over HTTPS in a production environment
+            // };
+
+          //const access_token =  
+
+          // res.setHeader('Set-Cookie', serialize('access_token',access_token , cookieOptions));
+
+          const data = {
+            access_token: await this.jwtService.signAsync(payload,{secret : "SECRET", expiresIn: "60s"}),// ,{secret : "SECRET"} // secret are given in seller-auth.module.ts
+            // userId : user.id,
+            // userName : user.sellerName,
+            // userEmailAddress : user.sellerEmailAddress,
+          }
             return {
-              access_token: await this.jwtService.signAsync(payload,{secret : "SECRET"}),// ,{secret : "SECRET"} // secret are given in seller-auth.module.ts
-              userId : user.id,
-              userName : user.sellerName,
-              userEmailAddress : user.sellerEmailAddress,
+              data: data,
               
             }
           }else{

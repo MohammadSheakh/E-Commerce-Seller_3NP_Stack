@@ -203,9 +203,7 @@ export class SellerController {
       console.log("========== in sellerLogin controller === req, session, session.email", "==", session, "====", session.email);
       //const user =  this.sellerService.sellerLogin(req);
       if(req.user){
-        
         session.email = req.user.sellerEmailAddress;
-
       }
 
       
@@ -230,12 +228,11 @@ export class SellerController {
   // 7 🔰 seller login >> JWT 🟢
   //@UseGuards(JwtAuthGuard)
   @Post('sellerLoginJWT')// 📃2
-  sellerLoginJWT( @Body() loginInfo/*@Request() req*/) {
-    console.log("test 1 from seller controller .. no print")
-    //return this.sellerService.sellerLoginWithJWT(req);
+  sellerLoginJWT( @Body() loginInfo/*, @Res() res*/ /*@Request() req*/) {
+    console.log("dto 🟢🟢", loginInfo);
+    
     return this.sellerAuthService.loginWithJWT(loginInfo);
-    //console.log(loginInfo);
-    //return req.user;
+    
   }
 
 
