@@ -17,10 +17,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any) {
-    // payload.sub => seller.id
-    // payload.username => seller.username
-    // payload.sellerEmailAddress => seller.sellerEmailAddress
-    console.log("in jwt folder -> jwt strategy -> validate function")
+    console.log("user is validated .. ")
+    //console.log("in jwt folder -> jwt strategy -> validate function")
     // ekhane user er shob info pull kore niye eshe return korte hobe .. 
     return { sellerId: payload.sub, sellerEmailAddress: payload.sellerEmailAddress };
   }

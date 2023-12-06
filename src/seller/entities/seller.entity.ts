@@ -1,5 +1,8 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from "typeorm"
 import { ReviewReply } from "./product/review/reviewReply.entity";
+import { Product } from "./product/product.entity";
+import { Category } from "./product/category.entity";
+import { Brand } from "./product/brand.entity";
 
 @Entity()
 export class Seller {
@@ -14,8 +17,8 @@ export class Seller {
   sellerEmailAddress : string;
   @Column('text', {default : ""})
   sellerPassword:string;
-  @Column({default : 0})
-  sellerPhoneNumber:number; // i think eita string hobe .. 
+  @Column({default : ""})
+  sellerPhoneNumber:string; // number, i think eita string hobe .. 
   @Column('text', {default : ""})
   sellerDescription?:string;
   @Column('text', {default : ""})// 🔴
@@ -46,6 +49,16 @@ export class Seller {
   // 🟢 seller can give reviewReply one to many 
   @OneToMany(() => ReviewReply, (reviewReply) => reviewReply.sellerId, { /*🟢🟢🟢🟢🟢eager: true, */ cascade: true })
   reviewReplies : ReviewReply[]; // One seller can have multiple reviewReply 
+
+
+  @OneToMany(() => Product, (product) => product.sellerId, { /*🟢🟢🟢🟢🟢eager: true, */ cascade: true })
+  products : Product[]; // One seller can have multiple reviewReply 
+
+  @OneToMany(() => Category, (category) => category.sellerId, {  cascade: true })
+  categories: Category[]; // One seller can have multiple category
+
+  @OneToMany(() => Brand, (brand) => brand.sellerId, {  cascade: true })
+  brands: Brand[]; // One seller can have multiple category
 
 }
 

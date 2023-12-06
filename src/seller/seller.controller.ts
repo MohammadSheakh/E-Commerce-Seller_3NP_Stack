@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UsePipes, ValidationPipe, UploadedFile, UseInterceptors, UseGuards, Request, UploadedFiles, HttpException, HttpStatus, Query, Res, Session, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UsePipes, ValidationPipe, UploadedFile, UseInterceptors, UseGuards, Request, UploadedFiles, HttpException, HttpStatus, Query, Res, Session, Req, Put } from '@nestjs/common';
 
 import { CreateSellerDto } from './dto/seller/create-seller.dto';
 import { UpdateSellerDto } from './dto/seller/update-seller.dto';
@@ -122,11 +122,20 @@ export class SellerController {
     return this.sellerService.getPaymentCompleteStatusOfPreOrder();
   }
 
-  @UseGuards(SessionGuard)// 🔰
-   //14 🟢🟢🔴 // review add korar pore problem kortese
+  //@UseGuards(SessionGuard)// 🔰
+  @UseGuards(JwtAuthGuard) 
+  //14 🟢🟢🔴 // review add korar pore problem kortese
    @Get('getAllProductsDetails')
    async getAllProductsDetails() : Promise<Product[]>{
     return await this.sellerService.getAllProductsDetails();
+   }
+
+   
+   @UseGuards(JwtAuthGuard) 
+  //🟢 // review add korar pore problem kortese
+   @Get('getAllProductsDetailsById/:sellerId')
+   async getAllProductsDetailsById(@Param('sellerId', ParseIntPipe) sellerId: number) : Promise<Product[]>{
+    return await this.sellerService.getAllProductsDetailsById(sellerId);
    }
 
    @UseGuards(SessionGuard)// 🔰
@@ -172,13 +181,19 @@ export class SellerController {
   @UseGuards(JwtAuthGuard)
   @Get(':id')// 📃5
   async findOne(@Param('id', ParseIntPipe) id: number): Promise<Seller> {
+    // console.log("===================================================")
+    // console.log("in findOne controller, id : ", id)
     return this.sellerService.findOne(id);
   }
 
-  @UseGuards(SessionGuard)// 🔰
+  //@UseGuards(SessionGuard)// 🔰
+  @UseGuards(JwtAuthGuard)
   //4 🔰 update a sellers information 🟢🟢🔴 kichu logic add korte hobe
-  @Patch(':id')// 📃4
-  update(@Param('id', ParseIntPipe) id: number, @Body() updateSellerDto: UpdateSellerDto) {
+  //@Put(':id')// 📃4
+  @Patch('/update/:id')// 📃4
+  update(@Param('id', ParseIntPipe) id: number, @Body() updateSellerDto) {
+    //: UpdateSellerDto
+    console.log("update controller, id : ",id, updateSellerDto);
     return this.sellerService.update(id, updateSellerDto);
   }
 

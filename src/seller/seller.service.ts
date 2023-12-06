@@ -1,4 +1,4 @@
-import { Body, HttpException, HttpStatus, Injectable, NotFoundException, Post } from '@nestjs/common';
+import { Body, HttpException, HttpStatus, Injectable, NotFoundException, ParseIntPipe, Post } from '@nestjs/common';
 import { CreateSellerDto } from './dto/seller/create-seller.dto';
 import { UpdateSellerDto } from './dto/seller/update-seller.dto';
 import { Seller } from './entities/seller.entity';
@@ -148,9 +148,17 @@ export class SellerService {
   // 3 done //  🟢🟢
   async findOne(id: number) : Promise<Seller> {
     if(id != null && id != undefined){
-      return await this.sellersRepository.findOne({ //🟢 findOneOrFail use korte hobe ..
+
+      
+      const user =  await this.sellersRepository.findOne({ //🟢 findOneOrFail use korte hobe ..
         where: {id} // 🤔😥 // it means {id : id}
       });
+
+      // console.log("===================================================")
+      // console.log("in findOne service, id : ", id, " : user : ", user)
+      return user;
+
+
     }else{
       throw new HttpException(
         {
@@ -162,6 +170,8 @@ export class SellerService {
     }
     //return this.sellers.find(seller => seller.id == id);
   }
+
+
 
   // this is for jwt authentication login .. called in seller-auth.service.ts
   async findOneByEmail(email: string): Promise<Seller> {
@@ -184,8 +194,8 @@ export class SellerService {
     // let seller = this.sellers.find(seller => seller.id === id);
     // seller = {...seller, ...updateSellerDto}; // ⭕ Industry te bad practice 
     const seller = await this.findOne(id); //🟢 findOneOrFail use korte hobe ..
-    console.log("///////////////////////////////////",seller)
-    console.log("///////////////////////////////////",id,updateSellerDto)
+    //console.log("///////////////////////////////////",seller)
+    console.log("///////////////////////////////////updateSellerDto from service : ",id,updateSellerDto)
     if(seller == undefined){
       throw new NotFoundException();
     }
@@ -194,28 +204,25 @@ export class SellerService {
       // better hoito ekta object banaye .. sheta return kora .. 
       
 
-      if(updateSellerDto.id){
-        seller.id = seller.id;  
+      // if(updateSellerDto.id){
+      //   seller.id = seller.id;  
          
-      }
-      if(updateSellerDto.sellerName){
+      // }
+      if(updateSellerDto.sellerName){ // check
         seller.sellerName = updateSellerDto.sellerName;
       }
-      if(updateSellerDto.sellerEmailAddress){
+      if(updateSellerDto.sellerEmailAddress){// check
         seller.sellerEmailAddress = updateSellerDto.sellerEmailAddress;
       }
   
-      if(updateSellerDto.sellerPassword){
+      if(updateSellerDto.sellerPassword){// check
         seller.sellerPassword = updateSellerDto.sellerPassword;
       }
-      // if(updateSellerDto.sellerPhoneNumber){
-      //   seller.sellerPhoneNumber = updateSellerDto.sellerPhoneNumber;
-      // }
-      if(updateSellerDto.sellerDescription){
-        seller.sellerDescription = updateSellerDto.sellerDescription;
+      if(updateSellerDto.sellerPhoneNumber){ // check
+        seller.sellerPhoneNumber =  updateSellerDto.sellerPhoneNumber;
       }
-      if(updateSellerDto.shopDescription){
-        seller.shopDescription = updateSellerDto.shopDescription;
+      if(updateSellerDto.sellerDescription){ // check
+        seller.sellerDescription = updateSellerDto.sellerDescription;
       }
       if(updateSellerDto.shopName){
         seller.shopName = updateSellerDto.shopName;
@@ -223,19 +230,27 @@ export class SellerService {
       if(updateSellerDto.shopDescription){
         seller.shopDescription = updateSellerDto.shopDescription;
       }
+      
       if(updateSellerDto.status){
         seller.status = updateSellerDto.status;
       }
-      
-      // reviewReplies[] er upor map kora jacche na .. 
-      // 🔴🔴🔴🔴 pore check korte hobe ..       
-      
-      
-      //return seller;
 
-      // await this.sellersRepository.update(id, seller);
-      await this.sellersRepository.save(seller);
+      if(updateSellerDto.rating){
+        seller.rating = updateSellerDto.rating;
+      }
+      
+      if(updateSellerDto.offlineShopAddress){
+        seller.offlineShopAddress = updateSellerDto.offlineShopAddress;
+      }
+      
+      if(updateSellerDto.googleMapLocation){
+        seller.googleMapLocation = updateSellerDto.googleMapLocation;
+      }
+      
+      const r =  await this.sellersRepository.save(seller);
+      console.log(r);
       return this.findOne(id); // 😥
+      // return r;
     }else{
       throw new HttpException(
         {
@@ -303,6 +318,12 @@ export class SellerService {
   async getAllProductsDetails(){
 
     return await this.productsRepository.find();
+  }
+
+  // 🟢
+  async getAllProductsDetailsById(sellerId: number){
+
+    return await this.productsRepository.find({where: {sellerId: sellerId}});
   }
 
   // 15 🟢🟢

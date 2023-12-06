@@ -75,7 +75,7 @@ export class SellerAuthService {
   // loginWithJWT
   async loginWithJWT(seller: any/*, res:any*/){
     //console.log("auth service -> loginWithJWT(seller) => ", seller);
-    console.log("============= seller🟢🟢", seller);
+    //console.log("============= seller🟢🟢", seller);
 
     try{
       const user = await this.sellersRepository.findOneOrFail({
@@ -97,7 +97,7 @@ export class SellerAuthService {
 
             const payload = { sellerEmailAddress: seller.sellerEmailAddress, sub: user.id }; // this seller.id is sellers actual id 
             //console.log("auth service -> loginWithJWT(seller){payload} => ", payload);
-            console.log("auth service -> loginWithJWT(seller){return access_token} => ", await this.jwtService.signAsync(payload,{secret : "SECRET"}));
+            //console.log("auth service -> loginWithJWT(seller){return access_token} => ", await this.jwtService.signAsync(payload,{secret : "SECRET"}));
             
 
             // Set JWT token in a cookie
@@ -112,15 +112,19 @@ export class SellerAuthService {
 
           // res.setHeader('Set-Cookie', serialize('access_token',access_token , cookieOptions));
 
-          const data = {
+          console.log("user is validate from seller-auth.service.ts")
+          
+          console.log({
             access_token: await this.jwtService.signAsync(payload,{secret : "SECRET", expiresIn: "60s"}),// ,{secret : "SECRET"} // secret are given in seller-auth.module.ts
-            // userId : user.id,
-            // userName : user.sellerName,
-            // userEmailAddress : user.sellerEmailAddress,
-          }
+            userId : user.id,
+            userName : user.sellerName,
+            userEmailAddress : user.sellerEmailAddress,
+          });
             return {
-              data: data,
-              
+              access_token: await this.jwtService.signAsync(payload,{secret : "SECRET", expiresIn: "60s"}),// ,{secret : "SECRET"} // secret are given in seller-auth.module.ts
+              userId : user.id,
+              userName : user.sellerName,
+              userEmailAddress : user.sellerEmailAddress,
             }
           }else{
             return null; // not sure 

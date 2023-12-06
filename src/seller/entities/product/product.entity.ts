@@ -6,6 +6,7 @@ import { Specification } from "./specificaiton.entity";
 import { Review } from "./review/review.entity";
 import { Category } from "./category.entity";
 import { Brand } from "./brand.entity";
+import { Seller } from "../seller.entity";
 // import { Lazy } from 'typeorm';
 @Entity()
 export class Product {
@@ -64,6 +65,8 @@ export class Product {
   @UpdateDateColumn()
   updatedAt: Date; // Automatically saves the last update date and time
 
+  @ManyToOne(() => Seller, (seller) => seller.products) //,{eager : false}
+  sellerId : number;
 }
 /**
  * 

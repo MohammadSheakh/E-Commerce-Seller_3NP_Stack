@@ -2,6 +2,7 @@ import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "ty
 import { Product } from "./product.entity";
 import { type } from "os";
 import { Order } from "../order.entity";
+import { Seller } from "../seller.entity";
 @Entity()
 export class Brand{
     @PrimaryGeneratedColumn()
@@ -28,5 +29,7 @@ export class Brand{
    */
     productId: Product;
 
+    @ManyToOne(() => Seller,(seller) => seller.categories,{onDelete:'SET NULL'})
+    sellerId:Seller;
 
 }
