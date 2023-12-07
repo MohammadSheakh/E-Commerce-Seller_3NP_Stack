@@ -232,13 +232,24 @@ export class SellerController {
     return this.sellerService.update(id, updateSellerDto);
   }
 
-  @UseGuards(SessionGuard)// 🔰
+  //@UseGuards(SessionGuard)// 🔰
+  @UseGuards(JwtAuthGuard)
   //5 delete a seller  🟢🟢 done
   @Delete(':id') // 📃3
   remove(@Param('id', ParseIntPipe) id: number) {
     // 🔰 logged in user tar account delete korte parbe
     return this.sellerService.remove(id);
   }
+
+  @UseGuards(JwtAuthGuard)
+  // 🏠
+  @Delete('product/deleteProduct/:id') // 📃3
+  deleteProduct(@Param('id', ParseIntPipe) id: number) {
+    // 🔰 logged in user tar account delete korte parbe
+    console.log("from controller  deleteProduct: ", id)
+    return this.sellerService.deleteProduct(id);
+  }
+
 
 
   // @UseGuards(AuthGuard('local'))
@@ -287,10 +298,11 @@ export class SellerController {
 
 
   // 8 🔰 Create a new Product 🟢🔴
-  @UseGuards(SessionGuard)// 🔰
+  //@UseGuards(SessionGuard)// 🔰
+  @UseGuards(JwtAuthGuard)
   @Post('createProduct')// 📃1
   async createNewProduct(@Body() createProductDto) : Promise<Product> {
-    console.log("------------------- from controller -------------------");
+    console.log("------------------- from controller -------------------", createProductDto);
     return await this.sellerService.createNewProduct(createProductDto);
   }
 

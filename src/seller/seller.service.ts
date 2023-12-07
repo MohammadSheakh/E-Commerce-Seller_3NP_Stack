@@ -177,6 +177,28 @@ export class SellerService {
     //return this.sellers.find(seller => seller.id == id);
   }
 
+  // 🏠
+  async findOneProduct(id: number) : Promise<Product> {
+    if(id != null && id != undefined){
+
+      
+      const product =  await this.productsRepository.findOne({ //🟢 findOneOrFail use korte hobe ..
+        where: {id} // 🤔😥 // it means {id : id}
+      });
+      return product;
+
+
+    }else{
+      throw new HttpException(
+        {
+          status : HttpStatus.NOT_FOUND, // statusCode - 401
+          error : "product not found.", // short description
+        }, 
+        HttpStatus.NOT_FOUND // 2nd argument which is status 
+        );
+    }
+   }
+
 
 
   // this is for jwt authentication login .. called in seller-auth.service.ts
@@ -288,6 +310,22 @@ export class SellerService {
     
   }
 
+  // 🏠
+  async deleteProduct(id: number)  { // DeleteResult rakha jabe na 
+    //: Promise<Product>
+    
+    const productToDeleted = await this.findOneProduct(id); // string or number ? 😥
+
+    if(productToDeleted == undefined){
+      throw new NotFoundException();
+    }
+    console.log("from service for delete product : ", productToDeleted)
+    const deletedResult =  this.productsRepository.remove(productToDeleted); // delete method use kora jabe na 
+    if(deletedResult){
+      return "Successful";
+    }
+  }
+
 
   //8 🟢🔴 // id cant assign manually .. id set automatically
   async createNewProduct(createProductDto) : Promise<Product>{
@@ -298,11 +336,23 @@ export class SellerService {
       newProduct = {...createProductDto}
     }else{
      
-      newProduct = {id: Date.now(), ...createProductDto}
+      // newProduct = {id: Date.now(), ...createProductDto}
+      newProduct = {
+        id: Date.now(), //
+        name: createProductDto.name, //
+        details: createProductDto.details, //
+        // productImage
+        price: createProductDto.price, //
+        availableQuantity: createProductDto.availableQuantity, //
+        lowestQuantityToStock: createProductDto.lowestQuantityToStock, //
+        Category: createProductDto.category, ////////////////////////////////// 🔰 important ....... Category likhte hobe 
+        //Brand: createProductDto.brand,
+        /////sellerId: createProductDto.sellerId, // sellerid o front-end theke send korte hobe .. je kon seller product ta add korse 
+        
+      }
     }
-    // 🛡️🛡️🛡️this.products.push(newProduct)
+    
     console.log(newProduct);
-    //await this.productsRepository.create(newProduct);
     await this.productsRepository.save(newProduct);
     
     return newProduct;
