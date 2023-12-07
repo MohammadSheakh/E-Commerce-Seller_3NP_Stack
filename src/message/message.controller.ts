@@ -6,6 +6,7 @@ import { CreateConversationDto } from './dto/create-conversation.dto';
 import { Message } from './entities/message.entity';
 import { MessageService } from './message.service';
 import { SessionGuard } from 'src/seller-auth/session/session.guard';
+import { JwtAuthGuard } from 'src/seller-auth/jwt/jwt-auth.guard';
 
 @Controller('seller/message') //🔰  but we want this like seller/message .. 
 // how can we do that 
@@ -45,7 +46,7 @@ export class MessageController {
   // I think done 🟢✔️ initial Test Done
   // showAllConversationToCurrentLoggedInUser
   // 🔰🔰
-  @UseGuards(SessionGuard)// 🔰🔰🔰🔰🔰🔰
+  @UseGuards(JwtAuthGuard)// 🔰🔰🔰🔰🔰🔰
   // 🔰🔰
   @Get('showAllConversation')
   showAllConversationToCurrentLoggedInUser(

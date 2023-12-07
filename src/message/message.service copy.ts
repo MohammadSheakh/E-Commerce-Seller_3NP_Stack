@@ -92,8 +92,8 @@ export class MessageService {
 
         const participantsAreInDB =  await this.buyersRepository.findOne({ 
           where: [
-            {BuyerEmail : senderEmail},
-            {BuyerEmail : receiverEmail}
+            {sellerEmailAddress : senderEmail},
+            {sellerEmailAddress : receiverEmail}
           ]
         });
         if(participantsAreInDB){
@@ -107,8 +107,8 @@ export class MessageService {
       }else{
         const participantsAreInDB =  await this.buyersRepository.findOne({ 
           where: [
-            {BuyerEmail : senderEmail},
-            {BuyerEmail : receiverEmail}
+            {sellerEmailAddress : senderEmail},
+            {sellerEmailAddress : receiverEmail}
           ]
         });
         if(participantsAreInDB){
@@ -232,9 +232,9 @@ export class MessageService {
     //const buyers = await this.buyersRepository.find();
 
     const buyers = await this.buyersRepository.find({
-      select: ["BuyerFirstName", "BuyerId", "BuyerEmail"], // Select only the 'name' column
+      select: ["sellerName", "id", "sellerEmailAddress"], // Select only the 'name' column
       where: {
-        BuyerEmail: In(filteredParticipantsEmail2), // Match against the list of emails
+        sellerEmailAddress: In(filteredParticipantsEmail2), // Match against the list of emails
       },
     });
 
@@ -272,14 +272,14 @@ export class MessageService {
     console.log("conversation =>>>>=>>>>", conversation)
 
     const  selectedProperties2 : any = await buyers.map(buyer => {
-      //let filterBro = findMessageFromMessageRepoByEmail(buyer.BuyerEmail);
+      //let filterBro = findMessageFromMessageRepoByEmail(buyer.sellerEmailAddress);
       
       // lets pull conversations last message by email 
       // conversations er participants email er moddhe jodi buyer er email exist kore 
       // tahole .. last message ta show korbo 
 
       return {
-        userName : buyer.BuyerFirstName,
+        userName : buyer.sellerName,
         userPhoneNumber : buyer.BuyerPhoneNo,
         message : conversation
       }

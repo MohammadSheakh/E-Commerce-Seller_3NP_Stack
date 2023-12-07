@@ -5,10 +5,10 @@ import { Message } from 'src/message/entities/message.entity';
 @Entity()
 export class Buyer {
   @PrimaryGeneratedColumn()
-  BuyerId: number;
+  id: number;
 
   @Column('text', {default : ""})
-  BuyerFirstName: string;
+  sellerName: string;
 
   @Column('text', {default : ""})
   BuyerLastName: string;
@@ -17,7 +17,7 @@ export class Buyer {
   BuyerPassword: string;
 
   @Column('text', {default : ""})
-  BuyerEmail: string;
+  sellerEmailAddress: string;
 
   @Column('text', {default : ""})
   BuyerDOB: Date;

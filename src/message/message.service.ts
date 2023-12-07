@@ -94,8 +94,8 @@ export class MessageService {
 
         const participantsAreInDB =  await this.buyersRepository.findOne({ 
           where: [
-            {BuyerEmail : senderEmail},
-            {BuyerEmail : receiverEmail}
+            {sellerEmailAddress : senderEmail},
+            {sellerEmailAddress : receiverEmail}
           ]
         });
         if(participantsAreInDB){
@@ -109,8 +109,8 @@ export class MessageService {
       }else{
         const participantsAreInDB =  await this.buyersRepository.findOne({ 
           where: [
-            {BuyerEmail : senderEmail},
-            {BuyerEmail : receiverEmail}
+            {sellerEmailAddress : senderEmail},
+            {sellerEmailAddress : receiverEmail}
           ]
         });
         if(participantsAreInDB){
@@ -211,9 +211,9 @@ export class MessageService {
     console.log(filteredParticipantsEmail2)
 
     const buyers = await this.buyersRepository.find({
-      select: ["BuyerFirstName", "BuyerId", "BuyerEmail"], // Select only the 'name' column
+      select: ["sellerName", "id", "sellerEmailAddress"], // Select only the 'name' column
       where: {
-        BuyerEmail: In(filteredParticipantsEmail2), // Match against the list of emails
+        sellerEmailAddress: In(filteredParticipantsEmail2), // Match against the list of emails
       },
     });
 
@@ -257,7 +257,7 @@ export class MessageService {
     const buyersConversation  = buyers.map(buyer => {
      lastMessageOfEachConversationWhichContainsCurrentLogginUser.map(conversation => {
        console.log("======== 1")
-        if(conversation.participantsEmail == buyer.BuyerEmail){
+        if(conversation.participantsEmail == buyer.sellerEmailAddress){
           console.log("======== 2")
           
           // console.log(buyer);
