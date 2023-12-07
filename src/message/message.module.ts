@@ -18,10 +18,13 @@ import { ReviewReply } from 'src/seller/entities/product/review/reviewReply.enti
 import { Buyer } from 'src/seller/entities/buyer.entity';
 import { SellerAuthService } from 'src/seller-auth/seller-auth.service';
 import { JwtService } from '@nestjs/jwt';
+import { Brand } from 'src/seller/entities/product/brand.entity';
+import { Category } from 'src/seller/entities/product/category.entity';
+import { ProductCategorySeller } from 'src/seller/entities/product/productCategoryAndSeller/productCategorySeller';
 
 @Module({
   // AvailableQuality er  kahini ta bujhlam na 
-  imports: [TypeOrmModule.forFeature([Message, Conversation, Seller, Order, Product, AvailableQuality, Specification, Review,ReviewReply,Buyer ]), SellerModule /*SellerModule*/],
+  imports: [TypeOrmModule.forFeature([Message, Conversation, Seller ,ProductCategorySeller, Order, Product , AvailableQuality, Specification, Review,ReviewReply,Buyer,Brand,Category ]), SellerModule /*SellerModule*/],
   controllers: [MessageController],
   providers: [MessageService, SellerService, Repository, SellerAuthService, JwtService ],
 })

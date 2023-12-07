@@ -21,6 +21,8 @@ import { join } from 'path';
 import { SessionGuard } from 'src/seller-auth/session/session.guard';
 import { JwtAuthGuard } from 'src/seller-auth/jwt/jwt-auth.guard';
 import { SellerAuthService } from 'src/seller-auth/seller-auth.service';
+import { Category } from './entities/product/category.entity';
+import { Brand } from './entities/product/brand.entity';
 
 
 
@@ -137,6 +139,39 @@ export class SellerController {
    async getAllProductsDetailsById(@Param('sellerId', ParseIntPipe) sellerId: number) : Promise<Product[]>{
     return await this.sellerService.getAllProductsDetailsById(sellerId);
    }
+
+   // New 🏠
+   @UseGuards(JwtAuthGuard) 
+   @Get('getAllCategory')
+   async getAllCategory() : Promise<Category[]>{
+    return await this.sellerService.getAllCategory();
+   }
+
+   // New 🏠
+   @UseGuards(JwtAuthGuard) 
+   @Get('getAllBrand')
+   async getAllBrand() : Promise<Brand[]>{
+    return await this.sellerService.getAllBrand();
+   }
+
+   // New 🏠
+   @UseGuards(JwtAuthGuard) 
+   @Post('saveCategory/:id')
+   async saveCategory(@Param('id', ParseIntPipe) id: number, @Body() createCategory){
+    // createCategory er moddhe array of categoryId ashbe .. 
+    console.log("createCategory : ", createCategory,"--",id);
+    return await this.sellerService.saveCategory(id,createCategory);
+   }
+
+   // New 🏠
+   @UseGuards(JwtAuthGuard) 
+   @Get('getAllSelectedCategoryForSeller/:id')
+   async getSelectedCategoryForSeller(@Param('id', ParseIntPipe) id: number){
+    // createCategory er moddhe array of categoryId ashbe .. 
+    console.log("sellerId from getAllSelectedCategoryForSeller controller: ", id);
+    return await this.sellerService.getSelectedCategoryForSeller(id);
+   }
+
 
    @UseGuards(SessionGuard)// 🔰
    // 16 🟢🟢

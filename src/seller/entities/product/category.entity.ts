@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Product } from "./product.entity";
 import { type } from "os";
 import { Order } from "../order.entity";
@@ -30,8 +30,9 @@ export class Category{
 //    * //null assign kore dibo .. jeno pore onno kono employee ke ei task assign kore deowa jete pare 
 //    */
 
-      @ManyToOne(() => Seller,(seller) => seller.categories,{onDelete:'SET NULL'})
-      sellerId:Seller;
+      @OneToMany(() => Seller,(seller) => seller.categories)
+      
+      sellers:Seller[];
     
 
 

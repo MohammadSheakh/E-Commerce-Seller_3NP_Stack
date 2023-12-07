@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, ManyToOne, ManyToMany, JoinTable } from "typeorm"
 import { ReviewReply } from "./product/review/reviewReply.entity";
 import { Product } from "./product/product.entity";
 import { Category } from "./product/category.entity";
@@ -54,11 +54,16 @@ export class Seller {
   @OneToMany(() => Product, (product) => product.sellerId, { /*🟢🟢🟢🟢🟢eager: true, */ cascade: true })
   products : Product[]; // One seller can have multiple reviewReply 
 
-  @OneToMany(() => Category, (category) => category.sellerId, {  cascade: true })
-  categories: Category[]; // One seller can have multiple category
+  //@OneToMany(() => Category, (category) => category.sellerId, {  cascade: true })
+  //categories: Category[]; // One seller can have multiple category
 
   @OneToMany(() => Brand, (brand) => brand.sellerId, {  cascade: true })
   brands: Brand[]; // One seller can have multiple category
+
+
+  @OneToMany(() => Category, (category) => category.sellers)
+  
+  categories: Category[]; // One seller can have multiple category
 
 }
 

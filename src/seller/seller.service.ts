@@ -17,6 +17,9 @@ import { SellerAuthService } from 'src/seller-auth/seller-auth.service';
 import { MailerService } from '@nestjs-modules/mailer';
 import * as bcrypt from 'bcrypt';
 import { session } from 'passport';
+import { Category } from './entities/product/category.entity';
+import { Brand } from './entities/product/brand.entity';
+import { ProductCategorySeller } from './entities/product/productCategoryAndSeller/productCategorySeller';
 
 // Status📃(total: problem : )
 @Injectable()
@@ -30,6 +33,9 @@ export class SellerService {
     @InjectRepository(Specification) private availableSpecificaitonsRepository: Repository<Specification> ,
     @InjectRepository(Review) private reviewsRepository: Repository<Review> ,
     @InjectRepository(ReviewReply) private reviewRepliesRepository: Repository<ReviewReply> ,
+    @InjectRepository(Category) private categoriesRepository: Repository<Category> ,
+    @InjectRepository(Brand) private brandsRepository: Repository<Brand> ,
+    @InjectRepository(ProductCategorySeller) private productCategoryRepository: Repository<ProductCategorySeller> ,
       private sellerAuthService: SellerAuthService,
       private mailerService: MailerService
 
@@ -319,6 +325,73 @@ export class SellerService {
 
     return await this.productsRepository.find();
   }
+
+  //🏠
+  async getAllCategory(){
+
+    return await this.categoriesRepository.find();
+  }
+  // 🏠
+  async getAllBrand(){
+
+    return await this.brandsRepository.find();
+  }
+
+  // 🏠
+  async saveCategory(id:any, createCategory:any){
+    /// seller id ta diye seller ke khuje ber korte hobe .. 
+    // seller er categoriesCategoryID er moddhe category id gula save korte hobe ..
+
+    // createCategory er moddhe array of categoryId ashbe .. 
+    /**
+     * category id gular upor loop chaliye .. category id and seller id database e save korte hobe.. 
+     */
+
+    const seller = await this.sellersRepository.findOne({where: {id: id}});
+
+    // if seller found , then save category id and seller id in database ..
+    if(seller){
+      // seller.categoriesCategoryID = createCategory;
+      // await this.sellersRepository.save(seller);
+      // return seller;
+      //return await this.sellersRepository.update(id,createCategory);
+
+      console.log("seller is found from saveCategory service : ..", seller);
+
+      const res =await createCategory.map(  async(categoryId :any) => {
+        //console.log("categoryId : ..", categoryId);
+        
+        const res2 = await this.productCategoryRepository.create({
+          sellerId:id,
+          categoryId:categoryId
+        });
+        if(res2){
+          console.log("creation done ")
+          this.productCategoryRepository.save(res2);
+        }
+        
+      })
+
+      
+      console.log("done from saveCategory service");
+
+
+    }
+
+
+    //return await this.sellersRepository.update(id,createCategory);
+  }
+
+  // 🏠
+  async getSelectedCategoryForSeller(sellerId:any){
+
+    const seletedCategories = await this.productCategoryRepository.find({where: {sellerId: sellerId}});
+    console.log("getSelectedCategoryForSeller service", seletedCategories)
+    return seletedCategories;
+  }
+
+
+
 
   // 🟢
   async getAllProductsDetailsById(sellerId: number){

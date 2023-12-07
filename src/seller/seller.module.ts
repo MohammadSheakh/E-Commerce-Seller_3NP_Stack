@@ -15,9 +15,11 @@ import { Brand } from './entities/product/brand.entity';
 import { Buyer } from './entities/buyer.entity';
 import { SellerAuthService } from 'src/seller-auth/seller-auth.service';
 import { JwtService } from '@nestjs/jwt';
+import { ProductCategorySeller } from './entities/product/productCategoryAndSeller/productCategorySeller';
 
 @Module({
-  imports: [SellerModule,TypeOrmModule.forFeature([Seller,Buyer, Order, Product, Category, Brand, AvailableQuality, Specification, Review, ReviewReply])],
+  // ProductCategorySeller
+  imports: [SellerModule,TypeOrmModule.forFeature([Seller,Buyer, Order, Product,ProductCategorySeller, Category , Brand, AvailableQuality, Specification, Review, ReviewReply])],
   controllers: [SellerController],
   providers: [SellerService, Repository, SellerAuthService, JwtService],
   exports: [SellerService], // (we'll soon use it in our seller-auth service).
