@@ -192,7 +192,7 @@ export class MessageService {
   
   async showAllConversationToCurrentLoggedInUser(currentLoggedInUserEmail : string) /*:Promise<Conversation[]>*/ {   
     
-    console.log(currentLoggedInUserEmail)
+    //console.log(currentLoggedInUserEmail)
 //////////////////////////////////////////////////////////////////
     // 1. current logged in user conversation er participantEmail er moddhe ase kina check korbo
     //    shei conversation gula niye ashbo 
@@ -208,7 +208,7 @@ export class MessageService {
     const filteredParticipantsEmail2 = filteredParticipantsEmail1.map(participantEmail => participantEmail.replace('-'+currentLoggedInUserEmail,''));
     
 
-    console.log(filteredParticipantsEmail2)
+    //🟢console.log(filteredParticipantsEmail2)
 
     const buyers = await this.buyersRepository.find({
       select: ["sellerName", "id", "sellerEmailAddress"], // Select only the 'name' column
@@ -226,28 +226,32 @@ export class MessageService {
       
     });
 
-    console.log(buyers)
-    console.log(sellers)
+    //console.log(buyers)
+    //console.log(sellers)
 
     const lastMessageOfEachConversationWhichContainsCurrentLogginUser = conversations.map(conversation => {
-      const {lastMessage, participantsEmail} = conversation;
+      const {lastMessage, participantsEmail,conversationId} = conversation;
+      //console.log(conversation.conversationId);//////////////////////////🟢🟢🟢
       const filteredParticipantsEmail = participantsEmail.replace(currentLoggedInUserEmail+'-','');
       const filteredParticipantsEmail2 = filteredParticipantsEmail.replace('-'+currentLoggedInUserEmail,'');
       const lastMessageOfEachConversation = {
         lastMessage : lastMessage,
-        participantsEmail : filteredParticipantsEmail2
+        participantsEmail : filteredParticipantsEmail2,
+        conversationId : conversationId
       }
+      // console.log(lastMessageOfEachConversation)
       return lastMessageOfEachConversation;
     })
 
     let buyerConversation = []; 
 
-    console.log(lastMessageOfEachConversationWhichContainsCurrentLogginUser)
-    const callNewMethod = (buyer, lastMessage) => {
-      console.log("======== 3")
+    //🟢console.log(lastMessageOfEachConversationWhichContainsCurrentLogginUser)
+    const callNewMethod = (buyer, lastMessage, conversationId) => {
+     //🟢console.log("======== 1 in call new method")
       const buyerWithLastMessage = {
         ...buyer,
         lastMessage: lastMessage,
+        conversationId:conversationId
       };
       buyerConversation.push(buyerWithLastMessage);
       
@@ -256,13 +260,14 @@ export class MessageService {
   
     const buyersConversation  = buyers.map(buyer => {
      lastMessageOfEachConversationWhichContainsCurrentLogginUser.map(conversation => {
-       console.log("======== 1")
+       //🟢console.log("======== 1 in last message of each conversation which contains current logged in user", conversation)
         if(conversation.participantsEmail == buyer.sellerEmailAddress){
-          console.log("======== 2")
+          console.log(conversation);
+          //🟢console.log("======== 2")
           
           // console.log(buyer);
           // console.log(email.participantsEmail, email.lastMessage)
-          callNewMethod(buyer, conversation.lastMessage);
+          callNewMethod(buyer, conversation.lastMessage, conversation.conversationId);
         }
       })
       
@@ -287,22 +292,19 @@ export class MessageService {
 
     const sellersConversation  = sellers.map(seller => {
       lastMessageOfEachConversationWhichContainsCurrentLogginUser.map(conversation => {
-        console.log("======== 1")
+        //🟢console.log("======== 1")
          if(conversation.participantsEmail == seller.sellerEmailAddress){
-           console.log("======== 2")
+          //🟢 
+          console.log("======== ",conversation)
            
            // console.log(buyer);
            // console.log(email.participantsEmail, email.lastMessage)
-           callNewMethod(seller, conversation.lastMessage);
+           callNewMethod(seller, conversation.lastMessage, conversation.conversationId);
          }
        })
-       
      });
 
     
-    // buyerConversation.map(buyer => {
-    // console.log("buyer:::::::",buyer )
-    // })
   if(buyerConversation.length > 0){
     return buyerConversation;
   }else{
