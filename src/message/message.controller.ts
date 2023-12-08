@@ -55,6 +55,7 @@ export class MessageController {
     return this.messageService.showAllConversationToCurrentLoggedInUser(currentLoggedInUserEmail);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get('showAllMessageOfAConversation/:conversationId')
   showAllMessageOfAConversation(
     @Param('conversationId') conversationId: number
