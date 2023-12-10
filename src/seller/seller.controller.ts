@@ -208,6 +208,15 @@ export class SellerController {
     return await this.sellerService.getAllGeneralReview(sellerId);
    }
 
+   //🏠
+   @UseGuards(JwtAuthGuard)
+   @Delete('deleteReviewByReviewId/:id')
+   async deleteReviewByReviewId(@Param('id', ParseIntPipe) reviewId: number){
+    console.log("seller id from front-end from controller: ", reviewId)
+    return await this.sellerService.deleteReviewByReviewId(reviewId);
+   }
+
+
    
    @UseGuards(JwtAuthGuard)
    @Get('getAllAfterSalesReview/:id')

@@ -56,4 +56,11 @@ export class Review{
    @Column()//{ type: 'bigint' }
    sellerIdObject: number;
 
+   @Column({ default: 0 })
+   likeCount : number;
+
+   @Column({ default: 0 })
+   disLikeCount : number;
+
+
 }

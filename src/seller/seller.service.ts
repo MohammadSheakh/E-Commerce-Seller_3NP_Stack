@@ -489,18 +489,26 @@ async getAProductsDetailsById(productId: number){
   }
 
   async getAllGeneralReview(sellerId){
-    console.log("seller id from front-end from service: ", sellerId)
+    //console.log("seller id from front-end from service: ", sellerId)
     const reviews = await this.reviewsRepository.find({where:{sellerIdObject : sellerId, reviewCategory : ReviewCategoryEnum.General}});//{where:{sellerId : sellerId}}
-    console.log("reviews from service : ", reviews);
+    //console.log("reviews from service : ", reviews);
     return reviews;
   }
 
   async getAllAfterSalesReview(sellerId){
-    console.log("seller id from front-end from service: ", sellerId)
+    //console.log("seller id from front-end from service: ", sellerId)
     // const AfterSales = "getAllAfterSalesReview";
     const reviews = await this.reviewsRepository.find({where:{sellerIdObject : sellerId, reviewCategory : ReviewCategoryEnum.AfterSalesExperience} });//{where:{sellerId : sellerId}}
-    console.log("reviews from service : ", reviews);
+    //console.log("reviews from service : ", reviews);
     return reviews;
+  }
+
+  async deleteReviewByReviewId(reviewId){
+    const review = await this.reviewsRepository.findOneOrFail({where:{reviewId : reviewId}});
+    if(review){
+      const deletedReview = await this.reviewsRepository.remove(review);
+      return deletedReview;
+    }
   }
 
 
