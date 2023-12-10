@@ -440,11 +440,15 @@ export class SellerService {
     return seletedCategories;
   }
 
+// 🏠
+async getAProductsDetailsById(productId: number){
 
+  return await this.productsRepository.findOneOrFail({where: {id: productId}});
+}
 
 
   // 🟢
-  async getAllProductsDetailsById(sellerId: number){
+  async getAllProductsDetailsBySellerId(sellerId: number){
 
     return await this.productsRepository.find({where: {sellerId: sellerId}});
   }
@@ -484,6 +488,20 @@ export class SellerService {
     // return 
   }
 
+  async getAllGeneralReview(sellerId){
+    console.log("seller id from front-end from service: ", sellerId)
+    const reviews = await this.reviewsRepository.find({where:{sellerIdObject : sellerId, reviewCategory : ReviewCategoryEnum.General}});//{where:{sellerId : sellerId}}
+    console.log("reviews from service : ", reviews);
+    return reviews;
+  }
+
+  async getAllAfterSalesReview(sellerId){
+    console.log("seller id from front-end from service: ", sellerId)
+    // const AfterSales = "getAllAfterSalesReview";
+    const reviews = await this.reviewsRepository.find({where:{sellerIdObject : sellerId, reviewCategory : ReviewCategoryEnum.AfterSalesExperience} });//{where:{sellerId : sellerId}}
+    console.log("reviews from service : ", reviews);
+    return reviews;
+  }
 
 
 

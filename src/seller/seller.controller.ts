@@ -132,12 +132,20 @@ export class SellerController {
     return await this.sellerService.getAllProductsDetails();
    }
 
+   @UseGuards(JwtAuthGuard) 
+   //🏠
+    @Get('getAProductsDetailsById/:productId')
+    async getAProductsDetailsById(@Param('productId', ParseIntPipe) productId: number) : Promise<Product>{
+     return await this.sellerService.getAProductsDetailsById(productId);
+    }
+
    
+   // 🏠
    @UseGuards(JwtAuthGuard) 
   //🟢 // review add korar pore problem kortese
-   @Get('getAllProductsDetailsById/:sellerId')
-   async getAllProductsDetailsById(@Param('sellerId', ParseIntPipe) sellerId: number) : Promise<Product[]>{
-    return await this.sellerService.getAllProductsDetailsById(sellerId);
+   @Get('getAllProductsDetailsBySellerId/:sellerId')
+   async getAllProductsDetailsBySellerId(@Param('sellerId', ParseIntPipe) sellerId: number) : Promise<Product[]>{
+    return await this.sellerService.getAllProductsDetailsBySellerId(sellerId);
    }
 
    // New 🏠
@@ -187,6 +195,28 @@ export class SellerController {
    async addReplyToAReview(@Body() createReviewReplyDto : CreateReviewReplyDto) : Promise<ReviewReply>{
     return await this.sellerService.addReplyToAReview(createReviewReplyDto);
    }
+
+   // 🏠 Add review to seller option rakhte hobe .. 
+   // seller id pass korte hobe arki .. 
+   // category o pass korte hobe ..  
+
+   // 🏠 show review for specific seller by seller id 
+   @UseGuards(JwtAuthGuard)
+   @Get('getAllGeneralReview/:id')
+   async getAllGeneralReview(@Param('id', ParseIntPipe) sellerId: number): Promise<Review[]>{
+    console.log("seller id from front-end from controller: ", sellerId)
+    return await this.sellerService.getAllGeneralReview(sellerId);
+   }
+
+   
+   @UseGuards(JwtAuthGuard)
+   @Get('getAllAfterSalesReview/:id')
+   async getAllAfterSalesReview(@Param('id', ParseIntPipe) sellerId: number): Promise<Review[]>{
+    console.log("seller id from front-end from controller: ", sellerId)
+    return await this.sellerService.getAllAfterSalesReview(sellerId);
+   }
+
+
 
 
   //1 🔰create new seller 🟢🔴

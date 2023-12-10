@@ -3,6 +3,7 @@ import { Product } from "../product.entity";
 import { type } from "os";
 import { ReviewCategoryEnum } from "src/seller/model/review.model";
 import { ReviewReply } from "./reviewReply.entity";
+import { Seller } from "../../seller.entity";
 // controller service  16 
 @Entity()
 export class Review{
@@ -19,7 +20,7 @@ export class Review{
     reviewDetails : string;
 
     // Many Review To One 🟢Product
-    @ManyToOne(() => Product, (product) => product.reviews, {onDelete:'CASCADE'},) // onDelete:'SET NULL', 
+    @ManyToOne(() => Product, (product) => product.reviews, {onDelete:'CASCADE', eager: true},) // onDelete:'SET NULL', 
     /**
    * whats the type, what does it map to on the other table or the entity
    * // kono employee delete hoye gele .. task table er ei employee option e 
@@ -27,6 +28,7 @@ export class Review{
    */
     productId: Product;
 
+    
     
 
     // 🔴 circular dependency issue // partially solve .. dont know how 
@@ -39,5 +41,19 @@ export class Review{
 
   @UpdateDateColumn()
   updatedAt: Date; // Automatically saves the last update date and time
+
+
+   // Many Review To One 🟢Product
+    @ManyToOne(() => Seller, (seller) => seller.reviews, {onDelete:'CASCADE', eager: true},) // onDelete:'SET NULL', 
+    sellerId  : Seller;
+    //sellerId: number;
+   /**
+  * whats the type, what does it map to on the other table or the entity
+  * // kono employee delete hoye gele .. task table er ei employee option e 
+  * //null assign kore dibo .. jeno pore onno kono employee ke ei task assign kore deowa jete pare 
+  */
+
+   @Column()//{ type: 'bigint' }
+   sellerIdObject: number;
 
 }

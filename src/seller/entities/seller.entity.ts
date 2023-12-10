@@ -3,6 +3,7 @@ import { ReviewReply } from "./product/review/reviewReply.entity";
 import { Product } from "./product/product.entity";
 import { Category } from "./product/category.entity";
 import { Brand } from "./product/brand.entity";
+import { Review } from "./product/review/review.entity";
 
 @Entity()
 export class Seller {
@@ -65,6 +66,10 @@ export class Seller {
   
   categories: Category[]; // One seller can have multiple category
 
+
+  @OneToMany(() => Review, (review) => review.sellerId, { cascade: true, lazy : true})
+  reviews : Review[]; //🔗 One Seller can have many Review
+  // dui side ei  eager: true deowa jabe na 🔰🔰Circular eager relations are disallowed
 }
 
 
