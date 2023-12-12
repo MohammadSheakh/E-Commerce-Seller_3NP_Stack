@@ -8,7 +8,7 @@ import { Order } from './entities/order.entity';
 import { OrderStatusEnum, PaymentStatusEnum } from './model/preOrder.model';
 import { Notification } from './entities/notification.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeleteResult, Repository } from 'typeorm';
+import { DeleteResult, Like, Repository } from 'typeorm';
 import { AvailableQuality } from './entities/product/availableQuality.entity';
 import { Specification } from './entities/product/specificaiton.entity';
 import { Review } from './entities/product/review/review.entity';
@@ -197,6 +197,16 @@ export class SellerService {
         HttpStatus.NOT_FOUND // 2nd argument which is status 
         );
     }
+   }
+
+   // 🏠
+   async getProductsBySearch(searchValue){
+    console.log("==============",`%${searchValue}%`)
+    //const result =  await this.productsRepository.find({where: { name: `%${searchValue}%`}})
+    //const result =  await this.productsRepository.find({where: { name : `Lenovo`}})
+    const result =  await this.productsRepository.find({ where: { name: Like(`%${searchValue}%`) } })
+    console.log("== result : ", result);
+    return result;
    }
 
 

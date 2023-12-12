@@ -80,7 +80,6 @@ export class SellerController {
       res.status(200).send('Logged out successfully');
       return "logged out !";
     });
-
   }
   @UseGuards(SessionGuard)// 🔰
   @Get("getShopLogo")
@@ -90,6 +89,18 @@ export class SellerController {
   ){
     const shopLogo = await this.sellerService.getShopLogo(sellerId);
     const imagePath = join(__dirname, '..', '..','..', 'uploads', shopLogo); // Adjust the path as needed
+    res.sendFile(imagePath);
+  }
+
+  // 🏠
+  // @UseGuards(JwtAuthGuard)// 🔰
+  @Get("getProductImage")
+  async getProductImage(
+    @Query('imageName') imageName:string,
+    @Res() res
+  ){
+    //const imageName1 = await this.sellerService.getShopLogo(imageName);
+    const imagePath = join(__dirname, '..', '..','..', 'uploads', imageName); // Adjust the path as needed
     res.sendFile(imagePath);
   }
 
@@ -180,6 +191,16 @@ export class SellerController {
     return await this.sellerService.getSelectedCategoryForSeller(id);
    }
 
+    // New 🏠
+    //@UseGuards(JwtAuthGuard) 
+    @Get('getProductsBySearch')
+    //async getProductsBySearch(@Body() searchValue){
+      //async getProductsBySearch(@Query('searchValue') searchValue: string){
+    async getProductsBySearch(@Query('searchValue') searchValue:string){
+        // @Query('imageName') imageName:string,
+     console.log("getProductsBySearch controller: ", searchValue);
+     return await this.sellerService.getProductsBySearch(searchValue);
+    }
 
    @UseGuards(SessionGuard)// 🔰
    // 16 🟢🟢
