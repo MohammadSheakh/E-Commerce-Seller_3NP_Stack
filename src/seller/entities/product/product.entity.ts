@@ -7,6 +7,7 @@ import { Review } from "./review/review.entity";
 import { Category } from "./category.entity";
 import { Brand } from "./brand.entity";
 import { Seller } from "../seller.entity";
+import { SpecificationCategory } from "./specificationCategory.entity";
 // import { Lazy } from 'typeorm';
 @Entity()
 export class Product {
@@ -47,8 +48,8 @@ export class Product {
   
   // One Product Can Have Many Specification 
   // 🔗 One Product can have many Specification 
-  @OneToMany(() => Specification, (specification) => specification.productId, {eager: true , cascade: true, lazy : true})
-  specifications:  Specification[];
+  @OneToMany(() => SpecificationCategory, (specification) => specification.productId, {eager: true , cascade: true, lazy : true})
+  specificationCategory:  SpecificationCategory[];
     
   @OneToMany(() => Review, (review) => review.productId, { cascade: true, lazy : true})
   reviews : Review[]; //🔗 One Product can have many Review

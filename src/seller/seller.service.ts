@@ -446,7 +446,8 @@ export class SellerService {
   async getSelectedCategoryForSeller(sellerId:any){
 
     const seletedCategories = await this.productCategoryRepository.find({where: {sellerId: sellerId}});
-    console.log("getSelectedCategoryForSeller service", seletedCategories)
+    //const seletedCategories = await this.productCategoryRepository.find();
+    //console.log("getSelectedCategoryForSeller service", seletedCategories)
     return seletedCategories;
   }
 

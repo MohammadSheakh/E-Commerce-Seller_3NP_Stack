@@ -1,5 +1,5 @@
 
-import { Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, Column } from 'typeorm';
 import { Seller } from '../../seller.entity';
 import { Category } from '../category.entity';
 
@@ -11,7 +11,8 @@ export class ProductCategorySeller {
 
 
   // eager true deowa thik hobe na may be .. eta niye pore kaj korte hobe 😢😢😢😢😢
-  @ManyToOne(() => Seller, seller => seller.id, { onDelete: 'CASCADE' })
+  //@ManyToOne(() => Seller, seller => seller.id, { onDelete: 'CASCADE',eager:true })
+  @Column()
   //@JoinColumn() // age seller.categories chilo seller.id er jaygay 
   sellerId: number; // age Seller chilo
 

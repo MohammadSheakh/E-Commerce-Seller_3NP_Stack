@@ -187,12 +187,12 @@ export class SellerController {
    @Get('getAllSelectedCategoryForSeller/:id')
    async getSelectedCategoryForSeller(@Param('id', ParseIntPipe) id: number){
     // createCategory er moddhe array of categoryId ashbe .. 
-    console.log("sellerId from getAllSelectedCategoryForSeller controller: ", id);
+    // console.log("sellerId from getAllSelectedCategoryForSeller controller: ", id);
     return await this.sellerService.getSelectedCategoryForSeller(id);
    }
 
     // New 🏠
-    //@UseGuards(JwtAuthGuard) 
+    @UseGuards(JwtAuthGuard) 
     @Get('getProductsBySearch')
     //async getProductsBySearch(@Body() searchValue){
       //async getProductsBySearch(@Query('searchValue') searchValue: string){

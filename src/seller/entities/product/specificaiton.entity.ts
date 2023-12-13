@@ -2,6 +2,7 @@ import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Product } from "./product.entity";
 import { type } from "os";
 import { Order } from "../order.entity";
+import { SpecificationCategory } from "./specificationCategory.entity";
 @Entity()
 export class Specification{
     @PrimaryGeneratedColumn()
@@ -21,21 +22,21 @@ export class Specification{
     // small size */
 
     // 🔗 Many Specification To One Product 
-    @ManyToOne(() => Product, (product) => product.specifications, {onDelete:'SET NULL'})
+    @ManyToOne(() => SpecificationCategory, (specificationCategory) => specificationCategory.specifications, {onDelete:'SET NULL'})
     /**
    * whats the type, what does it map to on the other table or the entity
    * // kono employee delete hoye gele .. task table er ei employee option e 
    * //null assign kore dibo .. jeno pore onno kono employee ke ei task assign kore deowa jete pare 
    */
-    productId: Product;
+    specificationCategoryId : SpecificationCategory;
 
-    // 🔗 Many Specification To One Product 
-    @ManyToOne(() => Order, (order) => order.specifications, {onDelete:'SET NULL'})
-    /**
-   * whats the type, what does it map to on the other table or the entity
-   * // kono employee delete hoye gele .. task table er ei employee option e 
-   * //null assign kore dibo .. jeno pore onno kono employee ke ei task assign kore deowa jete pare 
-   */
-    orderId ?: Order;
+//     // 🔗 Many Specification To One Product 
+//     @ManyToOne(() => Order, (order) => order.specifications, {onDelete:'SET NULL'})
+//     /**
+//    * whats the type, what does it map to on the other table or the entity
+//    * // kono employee delete hoye gele .. task table er ei employee option e 
+//    * //null assign kore dibo .. jeno pore onno kono employee ke ei task assign kore deowa jete pare 
+//    */
+//     orderId ?: Order;
 
 }
