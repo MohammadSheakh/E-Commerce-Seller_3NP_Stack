@@ -21,10 +21,11 @@ import { JwtService } from '@nestjs/jwt';
 import { Brand } from 'src/seller/entities/product/brand.entity';
 import { Category } from 'src/seller/entities/product/category.entity';
 import { ProductCategorySeller } from 'src/seller/entities/product/productCategoryAndSeller/productCategorySeller';
+import { LikeDislike } from 'src/seller/entities/product/review/likeDislike.entity';
 
 @Module({
   // AvailableQuality er  kahini ta bujhlam na 
-  imports: [TypeOrmModule.forFeature([Message, Conversation, Seller ,ProductCategorySeller, Order, Product , AvailableQuality, Specification, Review,ReviewReply,Buyer,Brand,Category ]), SellerModule /*SellerModule*/],
+  imports: [TypeOrmModule.forFeature([Message, Conversation, Seller ,ProductCategorySeller, Order, Product , AvailableQuality, Specification, Review,ReviewReply, LikeDislike,Buyer,Brand,Category ]), SellerModule /*SellerModule*/],
   controllers: [MessageController],
   providers: [MessageService, SellerService, Repository, SellerAuthService, JwtService ],
 })

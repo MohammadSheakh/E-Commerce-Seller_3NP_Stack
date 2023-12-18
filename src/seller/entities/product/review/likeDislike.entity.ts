@@ -10,11 +10,11 @@ export class LikeDislike {
   id: number;
 
   @Column()
-  type: 'like' | 'dislike';
+  type: 'like' | 'dislike' | 'normal';
 
-  // @ManyToOne(type => Seller, user => user.likesDislikes)
-  // seller: Seller;
+  @ManyToOne(type => Seller, (user) => user.likeDislike, {eager:true})
+  seller: Seller;
 
-  // @ManyToOne(type => Review, review => review.likesDislikes)
-  // review: Review;
+  @ManyToOne(() => Review, review => review.likeDislikes)
+  review: Review;
 }

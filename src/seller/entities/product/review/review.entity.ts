@@ -1,9 +1,10 @@
-import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { Product } from "../product.entity";
 import { type } from "os";
 import { ReviewCategoryEnum } from "src/seller/model/review.model";
 import { ReviewReply } from "./reviewReply.entity";
 import { Seller } from "../../seller.entity";
+import { LikeDislike } from "./likeDislike.entity";
 // controller service  16 
 @Entity()
 export class Review{
@@ -61,6 +62,11 @@ export class Review{
 
    @Column({ default: 0 })
    disLikeCount : number;
+
+   @OneToMany(() => LikeDislike, likeDislike => likeDislike.review, { cascade: true })
+   
+   likeDislikes : LikeDislike[];
+
 
 
 }

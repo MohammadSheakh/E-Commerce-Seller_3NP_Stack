@@ -8,7 +8,7 @@ import { Order } from './entities/order.entity';
 import { OrderStatusEnum, PaymentStatusEnum } from './model/preOrder.model';
 import { Notification } from './entities/notification.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeleteResult, Like, Repository } from 'typeorm';
+import { DeleteResult, ILike, Like, Repository } from 'typeorm';
 import { AvailableQuality } from './entities/product/availableQuality.entity';
 import { Specification } from './entities/product/specificaiton.entity';
 import { Review } from './entities/product/review/review.entity';
@@ -20,6 +20,7 @@ import { session } from 'passport';
 import { Category } from './entities/product/category.entity';
 import { Brand } from './entities/product/brand.entity';
 import { ProductCategorySeller } from './entities/product/productCategoryAndSeller/productCategorySeller';
+import { LikeDislike } from './entities/product/review/likeDislike.entity';
 
 // Status📃(total: problem : )
 @Injectable()
@@ -35,7 +36,8 @@ export class SellerService {
     @InjectRepository(ReviewReply) private reviewRepliesRepository: Repository<ReviewReply> ,
     @InjectRepository(Category) private categoriesRepository: Repository<Category> ,
     @InjectRepository(Brand) private brandsRepository: Repository<Brand> ,
-    @InjectRepository(ProductCategorySeller) private productCategoryRepository: Repository<ProductCategorySeller> ,
+    @InjectRepository(ProductCategorySeller) private productCategoryRepository: Repository<ProductCategorySeller>,
+    @InjectRepository(LikeDislike) private likeDislikeRepository: Repository<LikeDislike> ,
       private sellerAuthService: SellerAuthService,
       private mailerService: MailerService
 
@@ -204,7 +206,7 @@ export class SellerService {
     console.log("==============",`%${searchValue}%`)
     //const result =  await this.productsRepository.find({where: { name: `%${searchValue}%`}})
     //const result =  await this.productsRepository.find({where: { name : `Lenovo`}})
-    const result =  await this.productsRepository.find({ where: { name: Like(`%${searchValue}%`) } })
+    const result =  await this.productsRepository.find({ where: { name: ILike(`%${searchValue}%`) } })
     console.log("== result : ", result);
     return result;
    }
@@ -506,6 +508,7 @@ async getAProductsDetailsById(productId: number){
     return reviews;
   }
 
+  //🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠
   async getAllAfterSalesReview(sellerId){
     //console.log("seller id from front-end from service: ", sellerId)
     // const AfterSales = "getAllAfterSalesReview";
@@ -523,6 +526,97 @@ async getAProductsDetailsById(productId: number){
   }
 
 
+  // 🏠
+  async doLikeDislikeToAReview(reviewId, sellerId, likeDislikeStatusComingFromFE){
+    console.log("from service : ", reviewId, sellerId, likeDislikeStatusComingFromFE);
+    const data = await this.likeDislikeRepository.find({where:{review:{reviewId}, seller: { id: sellerId } }})
+    // console.log(data)
+    console.log("----0---")
+    if(data.length == 0){
+      //data does not exist .. 
+      // create korte hobe .. 
+      // lets create 
+
+      const data =  await this.likeDislikeRepository.save({
+        type: likeDislikeStatusComingFromFE,
+        seller:sellerId,
+        review : reviewId
+      })
+      
+      //console.log("Like done")
+      console.log("----1---data do not exist .. create new entry",data)
+    }else{
+      // like dislike kichu ekta kora ase .. 
+      // dekhte hobe ki kora ase .. 
+
+      console.log("----1---data exist .. ",data)
+      const reactionFromDB =  data.map((data) =>  data.type)
+      
+      
+      console.log( reactionFromDB[0])
+      if((reactionFromDB[0] == "like") && (likeDislikeStatusComingFromFE == "like")){
+        console.log("change type -> normal");
+        // const data =  await this.likeDislikeRepository.save({
+        //   type: "normal",
+        //   seller:sellerId,
+        //   review : reviewId
+        // })
+        data.map((data) =>  {
+          data.type = "normal";
+          this.likeDislikeRepository.save(data);
+        })
+        
+      }else if((reactionFromDB[0] == "dislike") && (likeDislikeStatusComingFromFE == "dislike")){
+        console.log("change type -> normal");
+        data.map((data) =>  {
+          data.type = "normal";
+          this.likeDislikeRepository.save(data);
+        })
+      }else if((reactionFromDB[0] == "normal") && (likeDislikeStatusComingFromFE == "like")){
+        console.log("change type -> like");
+        data.map((data) =>  {
+          data.type = "like";
+          this.likeDislikeRepository.save(data);
+        })
+      }else if((reactionFromDB[0] == "normal") && (likeDislikeStatusComingFromFE == "dislike")){
+        console.log("change type -> dislike");
+        data.map((data) =>  {
+          data.type = "dislike";
+          this.likeDislikeRepository.save(data);
+        })
+      }
+      
+    }
+    /////////console.log('data from like dislike', data)
+    /**
+     * 
+     * like korte chaile 
+     * review id and seller id and "like" er against  e
+     * dekhbe likeDislike entity te kono entry ase kina 
+     * 
+     * kono data na pele .. 
+     * 
+     * like korbo 
+     * 
+     * and review entity te like count increase korbo
+     * 
+     * and jodi data pai .. like korte chaile
+     *  check korbo sheta 
+     * like naki dislike .. 
+     * 
+     * 
+     * like hoile dislike korbo 
+     * dislike hoile like korbo 
+     * 
+     * normal hoile like korbo 
+     * 
+     * 
+     * 
+     */
+
+
+
+  }
 
   // 9 done partially
   checkForStockAndsendStockLessNotification(){

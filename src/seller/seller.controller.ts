@@ -210,7 +210,8 @@ export class SellerController {
     return await this.sellerService.addReviewToAProduct(createReviewDto);
    }
 
-   @UseGuards(SessionGuard)// 🔰
+   //@UseGuards(SessionGuard)// 🔰
+   @UseGuards(JwtAuthGuard) 
    // 17 🟢🟢
    @Post('addReplyToAReview')
    async addReplyToAReview(@Body() createReviewReplyDto : CreateReviewReplyDto) : Promise<ReviewReply>{
@@ -238,7 +239,7 @@ export class SellerController {
    }
 
 
-   
+   //🏠
    @UseGuards(JwtAuthGuard)
    @Get('getAllAfterSalesReview/:id')
    async getAllAfterSalesReview(@Param('id', ParseIntPipe) sellerId: number): Promise<Review[]>{
@@ -247,6 +248,13 @@ export class SellerController {
    }
 
 
+   //🏠
+   @UseGuards(JwtAuthGuard)
+   @Post('doLikeDislikeToAReview')
+   async doLikeDislikeToAReview(@Query('reviewId', ParseIntPipe) reviewId: number,  @Query('sellerId', ParseIntPipe) sellerId: number, @Query('likeDislikeStatus') likeDislikeStatus: string){
+    //console.log("reviewId id from front-end from controller like dislike: ", reviewId)
+    return await this.sellerService.doLikeDislikeToAReview(reviewId, sellerId, likeDislikeStatus);
+   }
 
 
   //1 🔰create new seller 🟢🔴

@@ -4,6 +4,7 @@ import { Product } from "./product/product.entity";
 import { Category } from "./product/category.entity";
 import { Brand } from "./product/brand.entity";
 import { Review } from "./product/review/review.entity";
+import { LikeDislike } from "./product/review/likeDislike.entity";
 
 @Entity()
 export class Seller {
@@ -70,6 +71,10 @@ export class Seller {
   @OneToMany(() => Review, (review) => review.sellerId, { cascade: true, lazy : true})
   reviews : Review[]; //🔗 One Seller can have many Review
   // dui side ei  eager: true deowa jabe na 🔰🔰Circular eager relations are disallowed
+
+  @OneToMany(type=> LikeDislike, (likeDislike) => likeDislike.seller)
+  likeDislike : LikeDislike[];
+
 }
 
 
