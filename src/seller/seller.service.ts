@@ -528,10 +528,12 @@ async getAProductsDetailsById(productId: number){
 
   // 🏠
   async doLikeDislikeToAReview(reviewId, sellerId, likeDislikeStatusComingFromFE){
-    console.log("from service : ", reviewId, sellerId, likeDislikeStatusComingFromFE);
+    //console.log("from service : ", reviewId, sellerId, likeDislikeStatusComingFromFE);
     const data = await this.likeDislikeRepository.find({where:{review:{reviewId}, seller: { id: sellerId } }})
+
+    const review = await this.reviewsRepository.findOneOrFail({where:{reviewId : reviewId}});
     // console.log(data)
-    console.log("----0---")
+    console.log("----0--- likeDislikeStatusComingFromFE : ", likeDislikeStatusComingFromFE)
     if(data.length == 0){
       //data does not exist .. 
       // create korte hobe .. 
@@ -542,16 +544,24 @@ async getAProductsDetailsById(productId: number){
         seller:sellerId,
         review : reviewId
       })
+
+      if(likeDislikeStatusComingFromFE == "like"){
+        review.likeCount = review.likeCount + 1;
+        await this.reviewsRepository.save(review);
+      }else{
+        review.disLikeCount = review.disLikeCount + 1;
+        await this.reviewsRepository.save(review);
+      }
       
       //console.log("Like done")
-      console.log("----1---data do not exist .. create new entry",data)
+      console.log("----1---data do not exist .. create new entry")
     }else{
       // like dislike kichu ekta kora ase .. 
       // dekhte hobe ki kora ase .. 
 
-      console.log("----1---data exist .. ",data)
-      const reactionFromDB =  data.map((data) =>  data.type)
       
+      const reactionFromDB =  data.map((data) =>  data.type)
+      console.log("----1---data exist .. reactionFromDB : ", reactionFromDB)
       
       console.log( reactionFromDB[0])
       if((reactionFromDB[0] == "like") && (likeDislikeStatusComingFromFE == "like")){
@@ -565,6 +575,9 @@ async getAProductsDetailsById(productId: number){
           data.type = "normal";
           this.likeDislikeRepository.save(data);
         })
+
+        review.likeCount = review.likeCount - 1;
+        await this.reviewsRepository.save(review);
         
       }else if((reactionFromDB[0] == "dislike") && (likeDislikeStatusComingFromFE == "dislike")){
         console.log("change type -> normal");
@@ -572,18 +585,48 @@ async getAProductsDetailsById(productId: number){
           data.type = "normal";
           this.likeDislikeRepository.save(data);
         })
+
+        review.disLikeCount = review.disLikeCount - 1;
+        await this.reviewsRepository.save(review);
+
       }else if((reactionFromDB[0] == "normal") && (likeDislikeStatusComingFromFE == "like")){
         console.log("change type -> like");
         data.map((data) =>  {
           data.type = "like";
           this.likeDislikeRepository.save(data);
         })
+
+        review.likeCount = review.likeCount + 1;
+        await this.reviewsRepository.save(review);
+
       }else if((reactionFromDB[0] == "normal") && (likeDislikeStatusComingFromFE == "dislike")){
         console.log("change type -> dislike");
         data.map((data) =>  {
           data.type = "dislike";
           this.likeDislikeRepository.save(data);
         })
+
+        review.disLikeCount = review.disLikeCount + 1;
+        await this.reviewsRepository.save(review);
+      }else if((reactionFromDB[0] == "like") && (likeDislikeStatusComingFromFE == "dislike")){
+        console.log("change type -> dislike");
+        data.map((data) =>  {
+          data.type = "dislike";
+          this.likeDislikeRepository.save(data);
+        })
+        review.likeCount = review.likeCount - 1;
+        review.disLikeCount = review.disLikeCount + 1;
+        await this.reviewsRepository.save(review);
+      }else if((reactionFromDB[0] == "dislike") && (likeDislikeStatusComingFromFE == "like")){
+        console.log("change type -> like");
+        data.map((data) =>  {
+          data.type = "like";
+          this.likeDislikeRepository.save(data);
+        })
+
+        review.disLikeCount = review.disLikeCount - 1;
+        review.likeCount = review.likeCount + 1;
+        await this.reviewsRepository.save(review);
       }
       
     }
