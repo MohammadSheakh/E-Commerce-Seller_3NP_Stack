@@ -238,6 +238,14 @@ export class SellerController {
     return await this.sellerService.deleteReviewByReviewId(reviewId);
    }
 
+   //🏠
+   @UseGuards(JwtAuthGuard)
+   @Get('getReviewByReviewId/:id')
+   async getReviewByReviewId(@Param('id', ParseIntPipe) reviewId: number){
+    console.log("review id from front-end from controller: ", reviewId)
+    return await this.sellerService.getReviewByReviewId(reviewId);
+   }
+
 
    //🏠
    @UseGuards(JwtAuthGuard)
@@ -246,15 +254,15 @@ export class SellerController {
     console.log("seller id from front-end from controller: ", sellerId)
     return await this.sellerService.getAllAfterSalesReview(sellerId);
    }
-
-
+   
    //🏠
-   @UseGuards(JwtAuthGuard)
+   //@UseGuards(JwtAuthGuard)
    @Post('doLikeDislikeToAReview')
    async doLikeDislikeToAReview(@Query('reviewId', ParseIntPipe) reviewId: number,  @Query('sellerId', ParseIntPipe) sellerId: number, @Query('likeDislikeStatus') likeDislikeStatus: string){
     //console.log("reviewId id from front-end from controller like dislike: ", reviewId)
     return await this.sellerService.doLikeDislikeToAReview(reviewId, sellerId, likeDislikeStatus);
    }
+
 
 
   //1 🔰create new seller 🟢🔴

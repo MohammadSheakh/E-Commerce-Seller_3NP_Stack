@@ -520,9 +520,22 @@ async getAProductsDetailsById(productId: number){
   async deleteReviewByReviewId(reviewId){
     const review = await this.reviewsRepository.findOneOrFail({where:{reviewId : reviewId}});
     if(review){
+      // 🟢🟢 manually delete to solve error  // jodi database ei onDelete cascade kora jaito .. taile valo hoito
+      await this.likeDislikeRepository.delete({ review: { reviewId } });
+
+
       const deletedReview = await this.reviewsRepository.remove(review);
       return deletedReview;
     }
+  }
+
+  // 🏠
+  async getReviewByReviewId(reviewId){
+    const review = await this.reviewsRepository.findOneOrFail({where:{reviewId : reviewId}});
+    //if(review){
+      //const deletedReview = await this.reviewsRepository.remove(review);
+      return review;
+    //}
   }
 
 

@@ -123,45 +123,45 @@ export class MessageService {
 
       if(existFlag && againExistFlag){
       
-        // 🟢 lets call createNewConversation service function to do that 
-        const newConversation = {
-          participantsEmail : participant_email1,
-          lastMessage : message,
-          //timeStamps : Date.now()
-          timeStamps : new Date().toISOString(),
-        }
-        console.log(" ============== newConversation Creation done", newConversation);
-        const newCreatedConversation =  await this.createNewConversation(newConversation);
-        const newlyCreatedConversationId = newCreatedConversation.conversationId;
-        console.log(newCreatedConversation, " newlyCreatedConversationIdd ======2. ",newlyCreatedConversationId);
-        // jei conversatioin ta create korlam .. shetar id amar jana lagbe 
+            // 🟢 lets call createNewConversation service function to do that 
+            const newConversation = {
+              participantsEmail : participant_email1,
+              lastMessage : message,
+              //timeStamps : Date.now()
+              timeStamps : new Date().toISOString(),
+            }
+            console.log(" ============== newConversation Creation done", newConversation);
+            const newCreatedConversation =  await this.createNewConversation(newConversation);
+            const newlyCreatedConversationId = newCreatedConversation.conversationId;
+            console.log(newCreatedConversation, " newlyCreatedConversationIdd ======2. ",newlyCreatedConversationId);
+            // jei conversatioin ta create korlam .. shetar id amar jana lagbe 
 
-        // new message with conversation id
-        const newMessageWithConversationId = {
-          ...newMessage,
-          conversationId : newlyCreatedConversationId
-        }
-        console.log("newMessageWithConversationId :   :: 3", newMessageWithConversationId)
+            // new message with conversation id
+            const newMessageWithConversationId = {
+              ...newMessage,
+              conversationId : newlyCreatedConversationId
+            }
+            console.log("newMessageWithConversationId :   :: 3", newMessageWithConversationId)
 
-        // its time to save this in message table 
-        this.messagesRepository.save(newMessageWithConversationId);
-        return newMessageWithConversationId;
+            // its time to save this in message table 
+            this.messagesRepository.save(newMessageWithConversationId);
+            return newMessageWithConversationId;
         }else{
           //=======================================================
           console.log("Conversation Can not created")
 
-          throw new HttpException(
-            {
-              status : HttpStatus.NOT_FOUND, // statusCode - 401
-              error : "sender or receiver email not found.", // short description
-            }, 
-            HttpStatus.NOT_FOUND // 2nd argument which is status 
-            ,
-            // {
-            //   //optional //provide an error cause. 
-            //   cause : err
-            // }
-            );
+          // throw new HttpException(
+          //   {
+          //     status : HttpStatus.NOT_FOUND, // statusCode - 401
+          //     error : "sender or receiver email not found.", // short description
+          //   }, 
+          //   HttpStatus.NOT_FOUND // 2nd argument which is status 
+          //   ,
+          //   // {
+          //   //   //optional //provide an error cause. 
+          //   //   cause : err
+          //   // }
+          //   );
          
         }
       }
