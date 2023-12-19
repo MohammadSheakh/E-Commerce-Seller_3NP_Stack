@@ -66,6 +66,14 @@ export class MessageController {
   // 🔰delete a conversation
   // 🔰delete a message 
 
+  @UseGuards(JwtAuthGuard)
+  @Delete('deleteConversationByConversationId/:conversationId')
+  deleteConversationByConversationId(
+    @Param('conversationId') conversationId: number
+  ){
+    console.log("in controller for delete")
+    return this.messageService.deleteConversationByConversationId(conversationId);
+  }
 
-  
+
 }

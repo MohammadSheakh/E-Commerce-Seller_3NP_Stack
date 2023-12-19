@@ -33,6 +33,7 @@ export class MessageService {
   async createNewMessage(createMessageDto /*: CreateMessageDto*//*, senderEmail:string*/) : (Promise<Message>) {
     let existFlag : boolean = false;  
     let againExistFlag : boolean = false;  
+    let participantsAreInDBBBB ; 
   const {receiverEmail, message, senderEmail} = createMessageDto;
     const newMessage = {
       messageId : Date.now(),
@@ -41,7 +42,7 @@ export class MessageService {
       message : message,
       
     }
-    console.log("new Message Created 1. ",newMessage);
+    // console.log("new Message Created 1. ",newMessage);
     // check conversation already exist or not 
     
 
@@ -59,8 +60,8 @@ export class MessageService {
     });
     
     if(conversation){
-      console.log(" ============== previous conversation found", conversation);
-      console.log(conversation)
+      // console.log(" ============== previous conversation found", conversation);
+       // console.log(conversation)
       const { conversationId} = conversation;
       // conversation exist 
       // add message in message table 
@@ -76,20 +77,32 @@ export class MessageService {
       await this.messagesRepository.save(newMessageWithConversationId);
       return newMessageWithConversationId;
     }else{
-      console.log(" ============== conversation does not exist============");
+      // console.log(" ============== conversation does not exist============ >> conversation is null" , conversation);
       // conversation does not exist 
       // create a conversation with participant_email and timeStamps
 
       //🟢check korte hobe sender and receiver seller and buyer database e ase kina
-      const participantsAreInDB = await this.sellersRepository.findOne({ 
+      const participantsAreInDBForSellerSender = await this.sellersRepository.findOne({ 
         where: [
           {sellerEmailAddress : senderEmail},
-          {sellerEmailAddress : receiverEmail}
+          
         ]
       });
 
-      if(participantsAreInDB){
-        console.log("sender email or receiver email are in sellerRepository ")
+
+      const participantsAreInDBForSellerReceiver = await this.sellersRepository.findOne({ 
+        where: [
+          {sellerEmailAddress : receiverEmail}
+        ]
+      });
+      if(participantsAreInDBForSellerReceiver){
+        againExistFlag  =true;
+      }
+
+      participantsAreInDBBBB = participantsAreInDBForSellerSender
+
+      if(participantsAreInDBForSellerSender){
+       // console.log("sender email or receiver email are in sellerRepository >>participantsAreInDB : ", participantsAreInDBBBB)
         existFlag = true;
 
         const participantsAreInDB =  await this.buyersRepository.findOne({ 
@@ -100,9 +113,9 @@ export class MessageService {
         });
         if(participantsAreInDB){
           againExistFlag = true;
-          console.log("sender email or receiver email are in buyerRepository ")
+          //console.log("sender email or receiver email are in buyerRepository ")
         }else{
-          console.log("not exist in sellerRepository or buyerRepository ")
+          //console.log("not exist in sellerRepository or buyerRepository ")
           
         }
 
@@ -115,9 +128,9 @@ export class MessageService {
         });
         if(participantsAreInDB){
           againExistFlag = true;
-          console.log("sender email or receiver email are in buyerRepository ")
+          //console.log("sender email or receiver email are in buyerRepository ")
         }else{
-          console.log("not exist in sellerRepository or buyerRepository ")
+          //console.log("not exist in sellerRepository or buyerRepository ")
         }
       }
 
@@ -130,10 +143,10 @@ export class MessageService {
               //timeStamps : Date.now()
               timeStamps : new Date().toISOString(),
             }
-            console.log(" ============== newConversation Creation done", newConversation);
+            //console.log(" ============== newConversation Creation done", newConversation);
             const newCreatedConversation =  await this.createNewConversation(newConversation);
             const newlyCreatedConversationId = newCreatedConversation.conversationId;
-            console.log(newCreatedConversation, " newlyCreatedConversationIdd ======2. ",newlyCreatedConversationId);
+            // console.log(newCreatedConversation, " newlyCreatedConversationIdd ======2. ",newlyCreatedConversationId);
             // jei conversatioin ta create korlam .. shetar id amar jana lagbe 
 
             // new message with conversation id
@@ -141,14 +154,14 @@ export class MessageService {
               ...newMessage,
               conversationId : newlyCreatedConversationId
             }
-            console.log("newMessageWithConversationId :   :: 3", newMessageWithConversationId)
+          //  console.log("newMessageWithConversationId :   :: 3", newMessageWithConversationId)
 
             // its time to save this in message table 
             this.messagesRepository.save(newMessageWithConversationId);
             return newMessageWithConversationId;
         }else{
           //=======================================================
-          console.log("Conversation Can not created")
+          // console.log("Conversation Can not created")
 
           // throw new HttpException(
           //   {
@@ -262,7 +275,7 @@ export class MessageService {
      lastMessageOfEachConversationWhichContainsCurrentLogginUser.map(conversation => {
        //🟢console.log("======== 1 in last message of each conversation which contains current logged in user", conversation)
         if(conversation.participantsEmail == buyer.sellerEmailAddress){
-          console.log(conversation);
+          // console.log(conversation);
           //🟢console.log("======== 2")
           
           // console.log(buyer);
@@ -295,7 +308,7 @@ export class MessageService {
         //🟢console.log("======== 1")
          if(conversation.participantsEmail == seller.sellerEmailAddress){
           //🟢 
-          console.log("======== ",conversation)
+          // console.log("======== ",conversation)
            
            // console.log(buyer);
            // console.log(email.participantsEmail, email.lastMessage)
@@ -352,6 +365,10 @@ export class MessageService {
     
   }
 
+  async deleteConversationByConversationId(conversationId){
+    console.log("in service for delete")
+    return await this.conversationsRepository.delete(conversationId);
+  }
 
 
   
