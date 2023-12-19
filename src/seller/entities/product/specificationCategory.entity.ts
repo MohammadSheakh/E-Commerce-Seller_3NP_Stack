@@ -1,17 +1,16 @@
 import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Product } from "./product.entity";
 import { type } from "os";
-import { Order } from "../order.entity";
-import { Seller } from "../seller.entity";
+import { Specification } from "./specificaiton.entity";
+
 @Entity()
-export class Brand{
+export class SpecificationCategory{
     @PrimaryGeneratedColumn()
-    BrandID: number;
+    id: number;
 
     @Column('text', {default : ""})
-    Name: string;
+    name: string;
 
-    
     /*
     // now i title can have may be multiple description 🔴
     // how we can design that ? 
@@ -20,8 +19,8 @@ export class Brand{
     // description should be max size 
     // small size */
 
-    // 🔗 Many Specification To One Product 
-    @OneToMany(() => Product, (product) => product.Brand/*, {onDelete:'SET NULL'}*/)
+    // 🔗 Many Specification Category To One Product 
+    @ManyToOne(() => Product, (product) => product.specificationCategory, {onDelete:'SET NULL'})
     /**
    * whats the type, what does it map to on the other table or the entity
    * // kono employee delete hoye gele .. task table er ei employee option e 
@@ -29,7 +28,7 @@ export class Brand{
    */
     productId: Product;
 
-    @ManyToOne(() => Seller,(seller) => seller.categories,{onDelete:'SET NULL'})
-    sellerId:Seller;
+    @OneToMany(() => Specification, (specificaiton)=>specificaiton.specificationCategoryId)
+    specifications : Specification[]
 
 }

@@ -11,15 +11,15 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       usernameField: 'sellerEmailAddress', // not sure 
       passwordField: 'sellerPassword',  // not sure 
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      ignoreExpiration: false,
+      ignoreExpiration: true,
       secretOrKey: "SECRET",
     });
   }
 
   async validate(payload: any) {
-    // payload.sub => seller.id
-    // payload.username => seller.username
-    // payload.sellerEmailAddress => seller.sellerEmailAddress
+    console.log("user is validated .. ")
+    //console.log("in jwt folder -> jwt strategy -> validate function")
+    // ekhane user er shob info pull kore niye eshe return korte hobe .. 
     return { sellerId: payload.sub, sellerEmailAddress: payload.sellerEmailAddress };
   }
 }

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UsePipes, ValidationPipe, UploadedFile, UseInterceptors, UseGuards, Request, UploadedFiles, HttpException, HttpStatus, Query, Res, Session, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UsePipes, ValidationPipe, UploadedFile, UseInterceptors, UseGuards, Request, UploadedFiles, HttpException, HttpStatus, Query, Res, Session, Req, Put } from '@nestjs/common';
 
 import { CreateSellerDto } from './dto/seller/create-seller.dto';
 import { UpdateSellerDto } from './dto/seller/update-seller.dto';
@@ -20,12 +20,19 @@ import { LocalAuthGuard } from 'src/seller-auth/local/local-auth.guard';
 import { join } from 'path';
 import { SessionGuard } from 'src/seller-auth/session/session.guard';
 import { JwtAuthGuard } from 'src/seller-auth/jwt/jwt-auth.guard';
+import { SellerAuthService } from 'src/seller-auth/seller-auth.service';
+import { Category } from './entities/product/category.entity';
+import { Brand } from './entities/product/brand.entity';
 
 
 
 @Controller('seller')
 export class SellerController {
-  constructor(private readonly sellerService: SellerService) {}
+  constructor(
+    private readonly sellerService: SellerService ,
+    private readonly sellerAuthService : SellerAuthService
+    
+    ) {}
 
   /**
    * 1. user jodi emon kono product search kore .. jeta
@@ -73,7 +80,6 @@ export class SellerController {
       res.status(200).send('Logged out successfully');
       return "logged out !";
     });
-
   }
   @UseGuards(SessionGuard)// 🔰
   @Get("getShopLogo")
@@ -83,6 +89,18 @@ export class SellerController {
   ){
     const shopLogo = await this.sellerService.getShopLogo(sellerId);
     const imagePath = join(__dirname, '..', '..','..', 'uploads', shopLogo); // Adjust the path as needed
+    res.sendFile(imagePath);
+  }
+
+  // 🏠
+  // @UseGuards(JwtAuthGuard)// 🔰
+  @Get("getProductImage")
+  async getProductImage(
+    @Query('imageName') imageName:string,
+    @Res() res
+  ){
+    //const imageName1 = await this.sellerService.getShopLogo(imageName);
+    const imagePath = join(__dirname, '..', '..','..', 'uploads', imageName); // Adjust the path as needed
     res.sendFile(imagePath);
   }
 
@@ -117,12 +135,72 @@ export class SellerController {
     return this.sellerService.getPaymentCompleteStatusOfPreOrder();
   }
 
-  @UseGuards(SessionGuard)// 🔰
-   //14 🟢🟢🔴 // review add korar pore problem kortese
+  //@UseGuards(SessionGuard)// 🔰
+  @UseGuards(JwtAuthGuard) 
+  //14 🟢🟢🔴 // review add korar pore problem kortese
    @Get('getAllProductsDetails')
    async getAllProductsDetails() : Promise<Product[]>{
     return await this.sellerService.getAllProductsDetails();
    }
+
+   @UseGuards(JwtAuthGuard) 
+   //🏠
+    @Get('getAProductsDetailsById/:productId')
+    async getAProductsDetailsById(@Param('productId', ParseIntPipe) productId: number) : Promise<Product>{
+     return await this.sellerService.getAProductsDetailsById(productId);
+    }
+
+   
+   // 🏠
+   @UseGuards(JwtAuthGuard) 
+  //🟢 // review add korar pore problem kortese
+   @Get('getAllProductsDetailsBySellerId/:sellerId')
+   async getAllProductsDetailsBySellerId(@Param('sellerId', ParseIntPipe) sellerId: number) : Promise<Product[]>{
+    return await this.sellerService.getAllProductsDetailsBySellerId(sellerId);
+   }
+
+   // New 🏠
+   @UseGuards(JwtAuthGuard) 
+   @Get('getAllCategory')
+   async getAllCategory() : Promise<Category[]>{
+    return await this.sellerService.getAllCategory();
+   }
+
+   // New 🏠
+   @UseGuards(JwtAuthGuard) 
+   @Get('getAllBrand')
+   async getAllBrand() : Promise<Brand[]>{
+    return await this.sellerService.getAllBrand();
+   }
+
+   // New 🏠
+   @UseGuards(JwtAuthGuard) 
+   @Post('saveCategory/:id')
+   async saveCategory(@Param('id', ParseIntPipe) id: number, @Body() createCategory){
+    // createCategory er moddhe array of categoryId ashbe .. 
+    console.log("createCategory : ", createCategory,"--",id);
+    return await this.sellerService.saveCategory(id,createCategory);
+   }
+
+   // New 🏠
+   @UseGuards(JwtAuthGuard) 
+   @Get('getAllSelectedCategoryForSeller/:id')
+   async getSelectedCategoryForSeller(@Param('id', ParseIntPipe) id: number){
+    // createCategory er moddhe array of categoryId ashbe .. 
+    // console.log("sellerId from getAllSelectedCategoryForSeller controller: ", id);
+    return await this.sellerService.getSelectedCategoryForSeller(id);
+   }
+
+    // New 🏠
+    @UseGuards(JwtAuthGuard) 
+    @Get('getProductsBySearch')
+    //async getProductsBySearch(@Body() searchValue){
+      //async getProductsBySearch(@Query('searchValue') searchValue: string){
+    async getProductsBySearch(@Query('searchValue') searchValue:string){
+        // @Query('imageName') imageName:string,
+     console.log("getProductsBySearch controller: ", searchValue);
+     return await this.sellerService.getProductsBySearch(searchValue);
+    }
 
    @UseGuards(SessionGuard)// 🔰
    // 16 🟢🟢
@@ -132,12 +210,59 @@ export class SellerController {
     return await this.sellerService.addReviewToAProduct(createReviewDto);
    }
 
-   @UseGuards(SessionGuard)// 🔰
+   //@UseGuards(SessionGuard)// 🔰
+   @UseGuards(JwtAuthGuard) 
    // 17 🟢🟢
    @Post('addReplyToAReview')
    async addReplyToAReview(@Body() createReviewReplyDto : CreateReviewReplyDto) : Promise<ReviewReply>{
     return await this.sellerService.addReplyToAReview(createReviewReplyDto);
    }
+
+   // 🏠 Add review to seller option rakhte hobe .. 
+   // seller id pass korte hobe arki .. 
+   // category o pass korte hobe ..  
+
+   // 🏠 show review for specific seller by seller id 
+   @UseGuards(JwtAuthGuard)
+   @Get('getAllGeneralReview/:id')
+   async getAllGeneralReview(@Param('id', ParseIntPipe) sellerId: number): Promise<Review[]>{
+    console.log("seller id from front-end from controller: ", sellerId)
+    return await this.sellerService.getAllGeneralReview(sellerId);
+   }
+
+   //🏠
+   @UseGuards(JwtAuthGuard)
+   @Delete('deleteReviewByReviewId/:id')
+   async deleteReviewByReviewId(@Param('id', ParseIntPipe) reviewId: number){
+    console.log("seller id from front-end from controller: ", reviewId)
+    return await this.sellerService.deleteReviewByReviewId(reviewId);
+   }
+
+   //🏠
+   @UseGuards(JwtAuthGuard)
+   @Get('getReviewByReviewId/:id')
+   async getReviewByReviewId(@Param('id', ParseIntPipe) reviewId: number){
+    console.log("review id from front-end from controller: ", reviewId)
+    return await this.sellerService.getReviewByReviewId(reviewId);
+   }
+
+
+   //🏠
+   @UseGuards(JwtAuthGuard)
+   @Get('getAllAfterSalesReview/:id')
+   async getAllAfterSalesReview(@Param('id', ParseIntPipe) sellerId: number): Promise<Review[]>{
+    console.log("seller id from front-end from controller: ", sellerId)
+    return await this.sellerService.getAllAfterSalesReview(sellerId);
+   }
+   
+   //🏠
+   //@UseGuards(JwtAuthGuard)
+   @Post('doLikeDislikeToAReview')
+   async doLikeDislikeToAReview(@Query('reviewId', ParseIntPipe) reviewId: number,  @Query('sellerId', ParseIntPipe) sellerId: number, @Query('likeDislikeStatus') likeDislikeStatus: string){
+    //console.log("reviewId id from front-end from controller like dislike: ", reviewId)
+    return await this.sellerService.doLikeDislikeToAReview(reviewId, sellerId, likeDislikeStatus);
+   }
+
 
 
   //1 🔰create new seller 🟢🔴
@@ -163,26 +288,44 @@ export class SellerController {
 
 
   //3 🔰 get one seller by id 🟢🟢
-  @UseGuards(SessionGuard)// 🔰
+  //@UseGuards(SessionGuard)// 🔰
+  @UseGuards(JwtAuthGuard)
   @Get(':id')// 📃5
   async findOne(@Param('id', ParseIntPipe) id: number): Promise<Seller> {
+    // console.log("===================================================")
+    // console.log("in findOne controller, id : ", id)
     return this.sellerService.findOne(id);
   }
 
-  @UseGuards(SessionGuard)// 🔰
+  //@UseGuards(SessionGuard)// 🔰
+  @UseGuards(JwtAuthGuard)
   //4 🔰 update a sellers information 🟢🟢🔴 kichu logic add korte hobe
-  @Patch(':id')// 📃4
-  update(@Param('id', ParseIntPipe) id: number, @Body() updateSellerDto: UpdateSellerDto) {
+  //@Put(':id')// 📃4
+  @Patch('/update/:id')// 📃4
+  update(@Param('id', ParseIntPipe) id: number, @Body() updateSellerDto) {
+    //: UpdateSellerDto
+    console.log("update controller, id : ",id, updateSellerDto);
     return this.sellerService.update(id, updateSellerDto);
   }
 
-  @UseGuards(SessionGuard)// 🔰
+  //@UseGuards(SessionGuard)// 🔰
+  @UseGuards(JwtAuthGuard)
   //5 delete a seller  🟢🟢 done
   @Delete(':id') // 📃3
   remove(@Param('id', ParseIntPipe) id: number) {
     // 🔰 logged in user tar account delete korte parbe
     return this.sellerService.remove(id);
   }
+
+  @UseGuards(JwtAuthGuard)
+  // 🏠
+  @Delete('product/deleteProduct/:id') // 📃3
+  deleteProduct(@Param('id', ParseIntPipe) id: number) {
+    // 🔰 logged in user tar account delete korte parbe
+    console.log("from controller  deleteProduct: ", id)
+    return this.sellerService.deleteProduct(id);
+  }
+
 
 
   // @UseGuards(AuthGuard('local'))
@@ -197,9 +340,7 @@ export class SellerController {
       console.log("========== in sellerLogin controller === req, session, session.email", "==", session, "====", session.email);
       //const user =  this.sellerService.sellerLogin(req);
       if(req.user){
-        
         session.email = req.user.sellerEmailAddress;
-
       }
 
       
@@ -222,19 +363,22 @@ export class SellerController {
   }
 
   // 7 🔰 seller login >> JWT 🟢
-  @UseGuards(JwtAuthGuard)
+  //@UseGuards(JwtAuthGuard)
   @Post('sellerLoginJWT')// 📃2
-  sellerLoginJWT(@Request() req) {
-    //return this.sellerService.sellerLoginWithJWT(req);
-    return req.user;
+  sellerLoginJWT( @Body() loginInfo/*, @Res() res*/ /*@Request() req*/) {
+    console.log("dto 🟢🟢", loginInfo);
+    
+    return this.sellerAuthService.loginWithJWT(loginInfo);
+    
   }
 
 
   // 8 🔰 Create a new Product 🟢🔴
-  @UseGuards(SessionGuard)// 🔰
+  //@UseGuards(SessionGuard)// 🔰
+  @UseGuards(JwtAuthGuard)
   @Post('createProduct')// 📃1
   async createNewProduct(@Body() createProductDto) : Promise<Product> {
-    console.log("------------------- from controller -------------------");
+    console.log("------------------- from controller -------------------", createProductDto);
     return await this.sellerService.createNewProduct(createProductDto);
   }
 

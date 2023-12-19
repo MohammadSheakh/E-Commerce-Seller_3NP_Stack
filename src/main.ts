@@ -8,26 +8,23 @@ async function bootstrap() {
   // dotenv.config();
 
   const app = await NestFactory.create(AppModule);
-  app.enableCors();
+  app.enableCors({
+    origin: '*', // Replace with your frontend app's URL
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    //credentials: true, // Set this to true if your frontend app includes credentials (e.g., cookies, HTTP authentication)
+  });
+  
+
   // app.use(
   //   session({
-  //     secret: 'my-secret',
-  //     resave: false,
-  //     saveUninitialized: false,
-      
+  //   secret: 'SECRET',
+  //   resave: false,
+  //   saveUninitialized: false,
+  //   cookie:{
+  //     maxAge: 1800000, // 30 minutes
+  //   }
   //   }),
-  // );
-
-  app.use(
-    session({
-    secret: 'my-secret',
-    resave: false,
-    saveUninitialized: false,
-    cookie:{
-      maxAge: 1800000, // 30 minutes
-    }
-    }),
-    );
+  //   );
     
   await app.listen(3000);
 

@@ -1,5 +1,5 @@
 export enum ReviewCategoryEnum{
-    PositiveReview = 'PositiveReview',
+    General = 'General',
     NegetiveReview = 'NegetiveReview',
     AfterSalesExperience = 'AfterSalesExperience',
 }

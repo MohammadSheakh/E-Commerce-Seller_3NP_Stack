@@ -1,5 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, ManyToOne, ManyToMany, JoinTable } from "typeorm"
 import { ReviewReply } from "./product/review/reviewReply.entity";
+import { Product } from "./product/product.entity";
+import { Category } from "./product/category.entity";
+import { Brand } from "./product/brand.entity";
+import { Review } from "./product/review/review.entity";
+import { LikeDislike } from "./product/review/likeDislike.entity";
 
 @Entity()
 export class Seller {
@@ -14,8 +19,8 @@ export class Seller {
   sellerEmailAddress : string;
   @Column('text', {default : ""})
   sellerPassword:string;
-  @Column({default : 0})
-  sellerPhoneNumber:number; // i think eita string hobe .. 
+  @Column({default : ""})
+  sellerPhoneNumber:string; // number, i think eita string hobe .. 
   @Column('text', {default : ""})
   sellerDescription?:string;
   @Column('text', {default : ""})// 🔴
@@ -46,6 +51,29 @@ export class Seller {
   // 🟢 seller can give reviewReply one to many 
   @OneToMany(() => ReviewReply, (reviewReply) => reviewReply.sellerId, { /*🟢🟢🟢🟢🟢eager: true, */ cascade: true })
   reviewReplies : ReviewReply[]; // One seller can have multiple reviewReply 
+
+
+  @OneToMany(() => Product, (product) => product.sellerId, { /*🟢🟢🟢🟢🟢eager: true, */ cascade: true })
+  products : Product[]; // One seller can have multiple reviewReply 
+
+  //@OneToMany(() => Category, (category) => category.sellerId, {  cascade: true })
+  //categories: Category[]; // One seller can have multiple category
+
+  @OneToMany(() => Brand, (brand) => brand.sellerId, {  cascade: true })
+  brands: Brand[]; // One seller can have multiple category
+
+
+  @OneToMany(() => Category, (category) => category.sellers)
+  
+  categories: Category[]; // One seller can have multiple category
+
+
+  @OneToMany(() => Review, (review) => review.sellerId, { cascade: true, lazy : true})
+  reviews : Review[]; //🔗 One Seller can have many Review
+  // dui side ei  eager: true deowa jabe na 🔰🔰Circular eager relations are disallowed
+
+  @OneToMany(type=> LikeDislike, (likeDislike) => likeDislike.seller)
+  likeDislike : LikeDislike[];
 
 }
 

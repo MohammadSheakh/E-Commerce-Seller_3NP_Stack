@@ -33,6 +33,7 @@ export class MessageService {
   async createNewMessage(createMessageDto /*: CreateMessageDto*//*, senderEmail:string*/) : (Promise<Message>) {
     let existFlag : boolean = false;  
     let againExistFlag : boolean = false;  
+    let participantsAreInDBBBB ; 
   const {receiverEmail, message, senderEmail} = createMessageDto;
     const newMessage = {
       messageId : Date.now(),
@@ -41,7 +42,7 @@ export class MessageService {
       message : message,
       
     }
-    console.log("new Message Created 1. ",newMessage);
+    // console.log("new Message Created 1. ",newMessage);
     // check conversation already exist or not 
     
 
@@ -59,8 +60,8 @@ export class MessageService {
     });
     
     if(conversation){
-      console.log(" ============== previous conversation found", conversation);
-      console.log(conversation)
+      // console.log(" ============== previous conversation found", conversation);
+       // console.log(conversation)
       const { conversationId} = conversation;
       // conversation exist 
       // add message in message table 
@@ -76,92 +77,104 @@ export class MessageService {
       await this.messagesRepository.save(newMessageWithConversationId);
       return newMessageWithConversationId;
     }else{
-      console.log(" ============== conversation does not exist============");
+      // console.log(" ============== conversation does not exist============ >> conversation is null" , conversation);
       // conversation does not exist 
       // create a conversation with participant_email and timeStamps
 
       //🟢check korte hobe sender and receiver seller and buyer database e ase kina
-      const participantsAreInDB = await this.sellersRepository.findOne({ 
+      const participantsAreInDBForSellerSender = await this.sellersRepository.findOne({ 
         where: [
           {sellerEmailAddress : senderEmail},
-          {sellerEmailAddress : receiverEmail}
+          
         ]
       });
 
-      if(participantsAreInDB){
-        console.log("sender email or receiver email are in sellerRepository ")
+
+      const participantsAreInDBForSellerReceiver = await this.sellersRepository.findOne({ 
+        where: [
+          {sellerEmailAddress : receiverEmail}
+        ]
+      });
+      if(participantsAreInDBForSellerReceiver){
+        againExistFlag  =true;
+      }
+
+      participantsAreInDBBBB = participantsAreInDBForSellerSender
+
+      if(participantsAreInDBForSellerSender){
+       // console.log("sender email or receiver email are in sellerRepository >>participantsAreInDB : ", participantsAreInDBBBB)
         existFlag = true;
 
         const participantsAreInDB =  await this.buyersRepository.findOne({ 
           where: [
-            {BuyerEmail : senderEmail},
-            {BuyerEmail : receiverEmail}
+            {sellerEmailAddress : senderEmail},
+            {sellerEmailAddress : receiverEmail}
           ]
         });
         if(participantsAreInDB){
           againExistFlag = true;
-          console.log("sender email or receiver email are in buyerRepository ")
+          //console.log("sender email or receiver email are in buyerRepository ")
         }else{
-          console.log("not exist in sellerRepository or buyerRepository ")
+          //console.log("not exist in sellerRepository or buyerRepository ")
           
         }
 
       }else{
         const participantsAreInDB =  await this.buyersRepository.findOne({ 
           where: [
-            {BuyerEmail : senderEmail},
-            {BuyerEmail : receiverEmail}
+            {sellerEmailAddress : senderEmail},
+            {sellerEmailAddress : receiverEmail}
           ]
         });
         if(participantsAreInDB){
           againExistFlag = true;
-          console.log("sender email or receiver email are in buyerRepository ")
+          //console.log("sender email or receiver email are in buyerRepository ")
         }else{
-          console.log("not exist in sellerRepository or buyerRepository ")
+          //console.log("not exist in sellerRepository or buyerRepository ")
         }
       }
 
       if(existFlag && againExistFlag){
       
-        // 🟢 lets call createNewConversation service function to do that 
-        const newConversation = {
-          participantsEmail : participant_email1,
-          lastMessage : message,
-          //timeStamps : Date.now()
-          timeStamps : new Date().toISOString(),
-        }
-        console.log(" ============== newConversation Creation done", newConversation);
-        const newCreatedConversation =  await this.createNewConversation(newConversation);
-        const newlyCreatedConversationId = newCreatedConversation.conversationId;
-        console.log(newCreatedConversation, " newlyCreatedConversationIdd ======2. ",newlyCreatedConversationId);
-        // jei conversatioin ta create korlam .. shetar id amar jana lagbe 
+            // 🟢 lets call createNewConversation service function to do that 
+            const newConversation = {
+              participantsEmail : participant_email1,
+              lastMessage : message,
+              //timeStamps : Date.now()
+              timeStamps : new Date().toISOString(),
+            }
+            //console.log(" ============== newConversation Creation done", newConversation);
+            const newCreatedConversation =  await this.createNewConversation(newConversation);
+            const newlyCreatedConversationId = newCreatedConversation.conversationId;
+            // console.log(newCreatedConversation, " newlyCreatedConversationIdd ======2. ",newlyCreatedConversationId);
+            // jei conversatioin ta create korlam .. shetar id amar jana lagbe 
 
-        // new message with conversation id
-        const newMessageWithConversationId = {
-          ...newMessage,
-          conversationId : newlyCreatedConversationId
-        }
-        console.log("newMessageWithConversationId :   :: 3", newMessageWithConversationId)
+            // new message with conversation id
+            const newMessageWithConversationId = {
+              ...newMessage,
+              conversationId : newlyCreatedConversationId
+            }
+          //  console.log("newMessageWithConversationId :   :: 3", newMessageWithConversationId)
 
-        // its time to save this in message table 
-        this.messagesRepository.save(newMessageWithConversationId);
-        return newMessageWithConversationId;
+            // its time to save this in message table 
+            this.messagesRepository.save(newMessageWithConversationId);
+            return newMessageWithConversationId;
         }else{
           //=======================================================
-          console.log("Conversation Can not created")
+          // console.log("Conversation Can not created")
 
-          throw new HttpException(
-            {
-              status : HttpStatus.NOT_FOUND, // statusCode - 401
-              error : "sender or receiver email not found.", // short description
-            }, 
-            HttpStatus.NOT_FOUND // 2nd argument which is status 
-            ,
-            // {
-            //   //optional //provide an error cause. 
-            //   cause : err
-            // }
-            );
+          // throw new HttpException(
+          //   {
+          //     status : HttpStatus.NOT_FOUND, // statusCode - 401
+          //     error : "sender or receiver email not found.", // short description
+          //   }, 
+          //   HttpStatus.NOT_FOUND // 2nd argument which is status 
+          //   ,
+          //   // {
+          //   //   //optional //provide an error cause. 
+          //   //   cause : err
+          //   // }
+          //   );
          
         }
       }
@@ -192,7 +205,7 @@ export class MessageService {
   
   async showAllConversationToCurrentLoggedInUser(currentLoggedInUserEmail : string) /*:Promise<Conversation[]>*/ {   
     
-    console.log(currentLoggedInUserEmail)
+    //console.log(currentLoggedInUserEmail)
 //////////////////////////////////////////////////////////////////
     // 1. current logged in user conversation er participantEmail er moddhe ase kina check korbo
     //    shei conversation gula niye ashbo 
@@ -208,12 +221,12 @@ export class MessageService {
     const filteredParticipantsEmail2 = filteredParticipantsEmail1.map(participantEmail => participantEmail.replace('-'+currentLoggedInUserEmail,''));
     
 
-    console.log(filteredParticipantsEmail2)
+    //🟢console.log(filteredParticipantsEmail2)
 
     const buyers = await this.buyersRepository.find({
-      select: ["BuyerFirstName", "BuyerId", "BuyerEmail"], // Select only the 'name' column
+      select: ["sellerName", "id", "sellerEmailAddress"], // Select only the 'name' column
       where: {
-        BuyerEmail: In(filteredParticipantsEmail2), // Match against the list of emails
+        sellerEmailAddress: In(filteredParticipantsEmail2), // Match against the list of emails
       },
     });
 
@@ -226,28 +239,32 @@ export class MessageService {
       
     });
 
-    console.log(buyers)
-    console.log(sellers)
+    //console.log(buyers)
+    //console.log(sellers)
 
     const lastMessageOfEachConversationWhichContainsCurrentLogginUser = conversations.map(conversation => {
-      const {lastMessage, participantsEmail} = conversation;
+      const {lastMessage, participantsEmail,conversationId} = conversation;
+      //console.log(conversation.conversationId);//////////////////////////🟢🟢🟢
       const filteredParticipantsEmail = participantsEmail.replace(currentLoggedInUserEmail+'-','');
       const filteredParticipantsEmail2 = filteredParticipantsEmail.replace('-'+currentLoggedInUserEmail,'');
       const lastMessageOfEachConversation = {
         lastMessage : lastMessage,
-        participantsEmail : filteredParticipantsEmail2
+        participantsEmail : filteredParticipantsEmail2,
+        conversationId : conversationId
       }
+      // console.log(lastMessageOfEachConversation)
       return lastMessageOfEachConversation;
     })
 
     let buyerConversation = []; 
 
-    console.log(lastMessageOfEachConversationWhichContainsCurrentLogginUser)
-    const callNewMethod = (buyer, lastMessage) => {
-      console.log("======== 3")
+    //🟢console.log(lastMessageOfEachConversationWhichContainsCurrentLogginUser)
+    const callNewMethod = (buyer, lastMessage, conversationId) => {
+     //🟢console.log("======== 1 in call new method")
       const buyerWithLastMessage = {
         ...buyer,
         lastMessage: lastMessage,
+        conversationId:conversationId
       };
       buyerConversation.push(buyerWithLastMessage);
       
@@ -256,13 +273,14 @@ export class MessageService {
   
     const buyersConversation  = buyers.map(buyer => {
      lastMessageOfEachConversationWhichContainsCurrentLogginUser.map(conversation => {
-       console.log("======== 1")
-        if(conversation.participantsEmail == buyer.BuyerEmail){
-          console.log("======== 2")
+       //🟢console.log("======== 1 in last message of each conversation which contains current logged in user", conversation)
+        if(conversation.participantsEmail == buyer.sellerEmailAddress){
+          // console.log(conversation);
+          //🟢console.log("======== 2")
           
           // console.log(buyer);
           // console.log(email.participantsEmail, email.lastMessage)
-          callNewMethod(buyer, conversation.lastMessage);
+          callNewMethod(buyer, conversation.lastMessage, conversation.conversationId);
         }
       })
       
@@ -287,22 +305,19 @@ export class MessageService {
 
     const sellersConversation  = sellers.map(seller => {
       lastMessageOfEachConversationWhichContainsCurrentLogginUser.map(conversation => {
-        console.log("======== 1")
+        //🟢console.log("======== 1")
          if(conversation.participantsEmail == seller.sellerEmailAddress){
-           console.log("======== 2")
+          //🟢 
+          // console.log("======== ",conversation)
            
            // console.log(buyer);
            // console.log(email.participantsEmail, email.lastMessage)
-           callNewMethod(seller, conversation.lastMessage);
+           callNewMethod(seller, conversation.lastMessage, conversation.conversationId);
          }
        })
-       
      });
 
     
-    // buyerConversation.map(buyer => {
-    // console.log("buyer:::::::",buyer )
-    // })
   if(buyerConversation.length > 0){
     return buyerConversation;
   }else{
@@ -350,6 +365,10 @@ export class MessageService {
     
   }
 
+  async deleteConversationByConversationId(conversationId){
+    console.log("in service for delete")
+    return await this.conversationsRepository.delete(conversationId);
+  }
 
 
   

@@ -1,4 +1,4 @@
-import { Body, HttpException, HttpStatus, Injectable, NotFoundException, Post } from '@nestjs/common';
+import { Body, HttpException, HttpStatus, Injectable, NotFoundException, ParseIntPipe, Post } from '@nestjs/common';
 import { CreateSellerDto } from './dto/seller/create-seller.dto';
 import { UpdateSellerDto } from './dto/seller/update-seller.dto';
 import { Seller } from './entities/seller.entity';
@@ -8,7 +8,7 @@ import { Order } from './entities/order.entity';
 import { OrderStatusEnum, PaymentStatusEnum } from './model/preOrder.model';
 import { Notification } from './entities/notification.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeleteResult, Repository } from 'typeorm';
+import { DeleteResult, ILike, Like, Repository } from 'typeorm';
 import { AvailableQuality } from './entities/product/availableQuality.entity';
 import { Specification } from './entities/product/specificaiton.entity';
 import { Review } from './entities/product/review/review.entity';
@@ -17,6 +17,10 @@ import { SellerAuthService } from 'src/seller-auth/seller-auth.service';
 import { MailerService } from '@nestjs-modules/mailer';
 import * as bcrypt from 'bcrypt';
 import { session } from 'passport';
+import { Category } from './entities/product/category.entity';
+import { Brand } from './entities/product/brand.entity';
+import { ProductCategorySeller } from './entities/product/productCategoryAndSeller/productCategorySeller';
+import { LikeDislike } from './entities/product/review/likeDislike.entity';
 
 // Status📃(total: problem : )
 @Injectable()
@@ -30,6 +34,10 @@ export class SellerService {
     @InjectRepository(Specification) private availableSpecificaitonsRepository: Repository<Specification> ,
     @InjectRepository(Review) private reviewsRepository: Repository<Review> ,
     @InjectRepository(ReviewReply) private reviewRepliesRepository: Repository<ReviewReply> ,
+    @InjectRepository(Category) private categoriesRepository: Repository<Category> ,
+    @InjectRepository(Brand) private brandsRepository: Repository<Brand> ,
+    @InjectRepository(ProductCategorySeller) private productCategoryRepository: Repository<ProductCategorySeller>,
+    @InjectRepository(LikeDislike) private likeDislikeRepository: Repository<LikeDislike> ,
       private sellerAuthService: SellerAuthService,
       private mailerService: MailerService
 
@@ -148,9 +156,17 @@ export class SellerService {
   // 3 done //  🟢🟢
   async findOne(id: number) : Promise<Seller> {
     if(id != null && id != undefined){
-      return await this.sellersRepository.findOne({ //🟢 findOneOrFail use korte hobe ..
+
+      
+      const user =  await this.sellersRepository.findOne({ //🟢 findOneOrFail use korte hobe ..
         where: {id} // 🤔😥 // it means {id : id}
       });
+
+      // console.log("===================================================")
+      // console.log("in findOne service, id : ", id, " : user : ", user)
+      return user;
+
+
     }else{
       throw new HttpException(
         {
@@ -162,6 +178,40 @@ export class SellerService {
     }
     //return this.sellers.find(seller => seller.id == id);
   }
+
+  // 🏠
+  async findOneProduct(id: number) : Promise<Product> {
+    if(id != null && id != undefined){
+
+      
+      const product =  await this.productsRepository.findOne({ //🟢 findOneOrFail use korte hobe ..
+        where: {id} // 🤔😥 // it means {id : id}
+      });
+      return product;
+
+
+    }else{
+      throw new HttpException(
+        {
+          status : HttpStatus.NOT_FOUND, // statusCode - 401
+          error : "product not found.", // short description
+        }, 
+        HttpStatus.NOT_FOUND // 2nd argument which is status 
+        );
+    }
+   }
+
+   // 🏠
+   async getProductsBySearch(searchValue){
+    console.log("==============",`%${searchValue}%`)
+    //const result =  await this.productsRepository.find({where: { name: `%${searchValue}%`}})
+    //const result =  await this.productsRepository.find({where: { name : `Lenovo`}})
+    const result =  await this.productsRepository.find({ where: { name: ILike(`%${searchValue}%`) } })
+    console.log("== result : ", result);
+    return result;
+   }
+
+
 
   // this is for jwt authentication login .. called in seller-auth.service.ts
   async findOneByEmail(email: string): Promise<Seller> {
@@ -184,8 +234,8 @@ export class SellerService {
     // let seller = this.sellers.find(seller => seller.id === id);
     // seller = {...seller, ...updateSellerDto}; // ⭕ Industry te bad practice 
     const seller = await this.findOne(id); //🟢 findOneOrFail use korte hobe ..
-    console.log("///////////////////////////////////",seller)
-    console.log("///////////////////////////////////",id,updateSellerDto)
+    //console.log("///////////////////////////////////",seller)
+    console.log("///////////////////////////////////updateSellerDto from service : ",id,updateSellerDto)
     if(seller == undefined){
       throw new NotFoundException();
     }
@@ -194,28 +244,25 @@ export class SellerService {
       // better hoito ekta object banaye .. sheta return kora .. 
       
 
-      if(updateSellerDto.id){
-        seller.id = seller.id;  
+      // if(updateSellerDto.id){
+      //   seller.id = seller.id;  
          
-      }
-      if(updateSellerDto.sellerName){
+      // }
+      if(updateSellerDto.sellerName){ // check
         seller.sellerName = updateSellerDto.sellerName;
       }
-      if(updateSellerDto.sellerEmailAddress){
+      if(updateSellerDto.sellerEmailAddress){// check
         seller.sellerEmailAddress = updateSellerDto.sellerEmailAddress;
       }
   
-      if(updateSellerDto.sellerPassword){
+      if(updateSellerDto.sellerPassword){// check
         seller.sellerPassword = updateSellerDto.sellerPassword;
       }
-      // if(updateSellerDto.sellerPhoneNumber){
-      //   seller.sellerPhoneNumber = updateSellerDto.sellerPhoneNumber;
-      // }
-      if(updateSellerDto.sellerDescription){
-        seller.sellerDescription = updateSellerDto.sellerDescription;
+      if(updateSellerDto.sellerPhoneNumber){ // check
+        seller.sellerPhoneNumber =  updateSellerDto.sellerPhoneNumber;
       }
-      if(updateSellerDto.shopDescription){
-        seller.shopDescription = updateSellerDto.shopDescription;
+      if(updateSellerDto.sellerDescription){ // check
+        seller.sellerDescription = updateSellerDto.sellerDescription;
       }
       if(updateSellerDto.shopName){
         seller.shopName = updateSellerDto.shopName;
@@ -223,19 +270,27 @@ export class SellerService {
       if(updateSellerDto.shopDescription){
         seller.shopDescription = updateSellerDto.shopDescription;
       }
+      
       if(updateSellerDto.status){
         seller.status = updateSellerDto.status;
       }
-      
-      // reviewReplies[] er upor map kora jacche na .. 
-      // 🔴🔴🔴🔴 pore check korte hobe ..       
-      
-      
-      //return seller;
 
-      // await this.sellersRepository.update(id, seller);
-      await this.sellersRepository.save(seller);
+      if(updateSellerDto.rating){
+        seller.rating = updateSellerDto.rating;
+      }
+      
+      if(updateSellerDto.offlineShopAddress){
+        seller.offlineShopAddress = updateSellerDto.offlineShopAddress;
+      }
+      
+      if(updateSellerDto.googleMapLocation){
+        seller.googleMapLocation = updateSellerDto.googleMapLocation;
+      }
+      
+      const r =  await this.sellersRepository.save(seller);
+      console.log(r);
       return this.findOne(id); // 😥
+      // return r;
     }else{
       throw new HttpException(
         {
@@ -267,6 +322,22 @@ export class SellerService {
     
   }
 
+  // 🏠
+  async deleteProduct(id: number)  { // DeleteResult rakha jabe na 
+    //: Promise<Product>
+    
+    const productToDeleted = await this.findOneProduct(id); // string or number ? 😥
+
+    if(productToDeleted == undefined){
+      throw new NotFoundException();
+    }
+    console.log("from service for delete product : ", productToDeleted)
+    const deletedResult =  this.productsRepository.remove(productToDeleted); // delete method use kora jabe na 
+    if(deletedResult){
+      return "Successful";
+    }
+  }
+
 
   //8 🟢🔴 // id cant assign manually .. id set automatically
   async createNewProduct(createProductDto) : Promise<Product>{
@@ -277,11 +348,23 @@ export class SellerService {
       newProduct = {...createProductDto}
     }else{
      
-      newProduct = {id: Date.now(), ...createProductDto}
+      // newProduct = {id: Date.now(), ...createProductDto}
+      newProduct = {
+        id: Date.now(), //
+        name: createProductDto.name, //
+        details: createProductDto.details, //
+        // productImage
+        price: createProductDto.price, //
+        availableQuantity: createProductDto.availableQuantity, //
+        lowestQuantityToStock: createProductDto.lowestQuantityToStock, //
+        Category: createProductDto.category, ////////////////////////////////// 🔰 important ....... Category likhte hobe 
+        //Brand: createProductDto.brand,
+        /////sellerId: createProductDto.sellerId, // sellerid o front-end theke send korte hobe .. je kon seller product ta add korse 
+        
+      }
     }
-    // 🛡️🛡️🛡️this.products.push(newProduct)
+    
     console.log(newProduct);
-    //await this.productsRepository.create(newProduct);
     await this.productsRepository.save(newProduct);
     
     return newProduct;
@@ -303,6 +386,84 @@ export class SellerService {
   async getAllProductsDetails(){
 
     return await this.productsRepository.find();
+  }
+
+  //🏠
+  async getAllCategory(){
+
+    return await this.categoriesRepository.find();
+  }
+  // 🏠
+  async getAllBrand(){
+
+    return await this.brandsRepository.find();
+  }
+
+  // 🏠
+  async saveCategory(id:any, createCategory:any){
+    /// seller id ta diye seller ke khuje ber korte hobe .. 
+    // seller er categoriesCategoryID er moddhe category id gula save korte hobe ..
+
+    // createCategory er moddhe array of categoryId ashbe .. 
+    /**
+     * category id gular upor loop chaliye .. category id and seller id database e save korte hobe.. 
+     */
+
+    const seller = await this.sellersRepository.findOne({where: {id: id}});
+
+    // if seller found , then save category id and seller id in database ..
+    if(seller){
+      // seller.categoriesCategoryID = createCategory;
+      // await this.sellersRepository.save(seller);
+      // return seller;
+      //return await this.sellersRepository.update(id,createCategory);
+
+      console.log("seller is found from saveCategory service : ..", seller);
+
+      const res =await createCategory.map(  async(categoryId :any) => {
+        //console.log("categoryId : ..", categoryId);
+        
+        const res2 = await this.productCategoryRepository.create({
+          sellerId:id,
+          categoryId:categoryId
+        });
+        if(res2){
+          console.log("creation done ")
+          this.productCategoryRepository.save(res2);
+        }
+        
+      })
+
+      
+      console.log("done from saveCategory service");
+
+
+    }
+
+
+    //return await this.sellersRepository.update(id,createCategory);
+  }
+
+  // 🏠
+  async getSelectedCategoryForSeller(sellerId:any){
+
+    const seletedCategories = await this.productCategoryRepository.find({where: {sellerId: sellerId}});
+    //const seletedCategories = await this.productCategoryRepository.find();
+    //console.log("getSelectedCategoryForSeller service", seletedCategories)
+    return seletedCategories;
+  }
+
+// 🏠
+async getAProductsDetailsById(productId: number){
+
+  return await this.productsRepository.findOneOrFail({where: {id: productId}});
+}
+
+
+  // 🟢
+  async getAllProductsDetailsBySellerId(sellerId: number){
+
+    return await this.productsRepository.find({where: {sellerId: sellerId}});
   }
 
   // 15 🟢🟢
@@ -340,8 +501,178 @@ export class SellerService {
     // return 
   }
 
+  async getAllGeneralReview(sellerId){
+    //console.log("seller id from front-end from service: ", sellerId)
+    const reviews = await this.reviewsRepository.find({where:{sellerIdObject : sellerId, reviewCategory : ReviewCategoryEnum.General}});//{where:{sellerId : sellerId}}
+    //console.log("reviews from service : ", reviews);
+    return reviews;
+  }
+
+  //🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠
+  async getAllAfterSalesReview(sellerId){
+    //console.log("seller id from front-end from service: ", sellerId)
+    // const AfterSales = "getAllAfterSalesReview";
+    const reviews = await this.reviewsRepository.find({where:{sellerIdObject : sellerId, reviewCategory : ReviewCategoryEnum.AfterSalesExperience} });//{where:{sellerId : sellerId}}
+    //console.log("reviews from service : ", reviews);
+    return reviews;
+  }
+
+  async deleteReviewByReviewId(reviewId){
+    const review = await this.reviewsRepository.findOneOrFail({where:{reviewId : reviewId}});
+    if(review){
+      // 🟢🟢 manually delete to solve error  // jodi database ei onDelete cascade kora jaito .. taile valo hoito
+      await this.likeDislikeRepository.delete({ review: { reviewId } });
 
 
+      const deletedReview = await this.reviewsRepository.remove(review);
+      return deletedReview;
+    }
+  }
+
+  // 🏠
+  async getReviewByReviewId(reviewId){
+    const review = await this.reviewsRepository.findOneOrFail({where:{reviewId : reviewId}});
+    //if(review){
+      //const deletedReview = await this.reviewsRepository.remove(review);
+      return review;
+    //}
+  }
+
+
+  // 🏠
+  async doLikeDislikeToAReview(reviewId, sellerId, likeDislikeStatusComingFromFE){
+    //console.log("from service : ", reviewId, sellerId, likeDislikeStatusComingFromFE);
+    const data = await this.likeDislikeRepository.find({where:{review:{reviewId}, seller: { id: sellerId } }})
+
+    const review = await this.reviewsRepository.findOneOrFail({where:{reviewId : reviewId}});
+    // console.log(data)
+    console.log("----0--- likeDislikeStatusComingFromFE : ", likeDislikeStatusComingFromFE)
+    if(data.length == 0){
+      //data does not exist .. 
+      // create korte hobe .. 
+      // lets create 
+
+      const data =  await this.likeDislikeRepository.save({
+        type: likeDislikeStatusComingFromFE,
+        seller:sellerId,
+        review : reviewId
+      })
+
+      if(likeDislikeStatusComingFromFE == "like"){
+        review.likeCount = review.likeCount + 1;
+        await this.reviewsRepository.save(review);
+      }else{
+        review.disLikeCount = review.disLikeCount + 1;
+        await this.reviewsRepository.save(review);
+      }
+      
+      //console.log("Like done")
+      console.log("----1---data do not exist .. create new entry")
+    }else{
+      // like dislike kichu ekta kora ase .. 
+      // dekhte hobe ki kora ase .. 
+
+      
+      const reactionFromDB =  data.map((data) =>  data.type)
+      console.log("----1---data exist .. reactionFromDB : ", reactionFromDB)
+      
+      console.log( reactionFromDB[0])
+      if((reactionFromDB[0] == "like") && (likeDislikeStatusComingFromFE == "like")){
+        console.log("change type -> normal");
+        // const data =  await this.likeDislikeRepository.save({
+        //   type: "normal",
+        //   seller:sellerId,
+        //   review : reviewId
+        // })
+        data.map((data) =>  {
+          data.type = "normal";
+          this.likeDislikeRepository.save(data);
+        })
+
+        review.likeCount = review.likeCount - 1;
+        await this.reviewsRepository.save(review);
+        
+      }else if((reactionFromDB[0] == "dislike") && (likeDislikeStatusComingFromFE == "dislike")){
+        console.log("change type -> normal");
+        data.map((data) =>  {
+          data.type = "normal";
+          this.likeDislikeRepository.save(data);
+        })
+
+        review.disLikeCount = review.disLikeCount - 1;
+        await this.reviewsRepository.save(review);
+
+      }else if((reactionFromDB[0] == "normal") && (likeDislikeStatusComingFromFE == "like")){
+        console.log("change type -> like");
+        data.map((data) =>  {
+          data.type = "like";
+          this.likeDislikeRepository.save(data);
+        })
+
+        review.likeCount = review.likeCount + 1;
+        await this.reviewsRepository.save(review);
+
+      }else if((reactionFromDB[0] == "normal") && (likeDislikeStatusComingFromFE == "dislike")){
+        console.log("change type -> dislike");
+        data.map((data) =>  {
+          data.type = "dislike";
+          this.likeDislikeRepository.save(data);
+        })
+
+        review.disLikeCount = review.disLikeCount + 1;
+        await this.reviewsRepository.save(review);
+      }else if((reactionFromDB[0] == "like") && (likeDislikeStatusComingFromFE == "dislike")){
+        console.log("change type -> dislike");
+        data.map((data) =>  {
+          data.type = "dislike";
+          this.likeDislikeRepository.save(data);
+        })
+        review.likeCount = review.likeCount - 1;
+        review.disLikeCount = review.disLikeCount + 1;
+        await this.reviewsRepository.save(review);
+      }else if((reactionFromDB[0] == "dislike") && (likeDislikeStatusComingFromFE == "like")){
+        console.log("change type -> like");
+        data.map((data) =>  {
+          data.type = "like";
+          this.likeDislikeRepository.save(data);
+        })
+
+        review.disLikeCount = review.disLikeCount - 1;
+        review.likeCount = review.likeCount + 1;
+        await this.reviewsRepository.save(review);
+      }
+      
+    }
+    /////////console.log('data from like dislike', data)
+    /**
+     * 
+     * like korte chaile 
+     * review id and seller id and "like" er against  e
+     * dekhbe likeDislike entity te kono entry ase kina 
+     * 
+     * kono data na pele .. 
+     * 
+     * like korbo 
+     * 
+     * and review entity te like count increase korbo
+     * 
+     * and jodi data pai .. like korte chaile
+     *  check korbo sheta 
+     * like naki dislike .. 
+     * 
+     * 
+     * like hoile dislike korbo 
+     * dislike hoile like korbo 
+     * 
+     * normal hoile like korbo 
+     * 
+     * 
+     * 
+     */
+
+
+
+  }
 
   // 9 done partially
   checkForStockAndsendStockLessNotification(){

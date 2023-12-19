@@ -6,6 +6,8 @@ import { Specification } from "./specificaiton.entity";
 import { Review } from "./review/review.entity";
 import { Category } from "./category.entity";
 import { Brand } from "./brand.entity";
+import { Seller } from "../seller.entity";
+import { SpecificationCategory } from "./specificationCategory.entity";
 // import { Lazy } from 'typeorm';
 @Entity()
 export class Product {
@@ -46,11 +48,13 @@ export class Product {
   
   // One Product Can Have Many Specification 
   // 🔗 One Product can have many Specification 
-  @OneToMany(() => Specification, (specification) => specification.productId, {eager: true , cascade: true, lazy : true})
-  specifications:  Specification[];
+  @OneToMany(() => SpecificationCategory, (specification) => specification.productId, {eager: true , cascade: true, lazy : true})
+  specificationCategory:  SpecificationCategory[];
     
-  @OneToMany(() => Review, (review) => review.productId, {eager: true, cascade: true, lazy : true})
+  @OneToMany(() => Review, (review) => review.productId, { cascade: true, lazy : true})
   reviews : Review[]; //🔗 One Product can have many Review
+  //eager: true, dui side e deowa jabe na .. Circular eager relations are disallowed
+
   
   @ManyToOne(() => Category, (category) => category.productId,{eager : true} /*{eager: true, cascade: true, lazy : true} */)
   Category : Category; 
@@ -64,6 +68,8 @@ export class Product {
   @UpdateDateColumn()
   updatedAt: Date; // Automatically saves the last update date and time
 
+  @ManyToOne(() => Seller, (seller) => seller.products) //,{eager : false}
+  sellerId : number;
 }
 /**
  * 
