@@ -104,6 +104,17 @@ export class SellerController {
     res.sendFile(imagePath);
   }
 
+  // 🏠
+  @Get("getLoggedInUserImage")
+  async getLoggedInUserImage(
+    @Query('imageName') imageName:string,
+    @Res() res
+  ){
+    //const imageName1 = await this.sellerService.getShopLogo(imageName);
+    const imagePath = join(__dirname, '..', '..','..', 'uploads', imageName); // Adjust the path as needed
+    res.sendFile(imagePath);
+  }
+
   @UseGuards(SessionGuard)// 🔰
   // 9 🔰 send notification to seller as a products available quality value is same as lowest value to stock
   //🟢🟢
@@ -302,10 +313,42 @@ export class SellerController {
   //4 🔰 update a sellers information 🟢🟢🔴 kichu logic add korte hobe
   //@Put(':id')// 📃4
   @Patch('/update/:id')// 📃4
-  update(@Param('id', ParseIntPipe) id: number, @Body() updateSellerDto) {
+
+  @UseInterceptors(FileFieldsInterceptor([
+    { name: 'sellerImage', maxCount: 1 },
+    { name: 'shopLogo', maxCount: 1 },
+  ],{ fileFilter: (req, file, cb) => {
+    if (file.originalname.match(/^.*\.(jpg)$/))
+    cb(null, true);
+    else {
+    cb(new MulterError('LIMIT_UNEXPECTED_FILE', 'image'), false);
+    }
+},
+limits: { fileSize: 9000000 },
+storage:diskStorage({
+destination: './uploads',
+filename: function (req, file, cb) {
+cb(null,Date.now()+file.originalname)
+},
+})
+}))
+
+  update(@Param('id', ParseIntPipe) id: number, @UploadedFiles() files: {
+    sellerImage?: Express.Multer.File[],
+   // shopLogo?: Express.Multer.File[]
+  }, @Body() updateSellerDto) {
     //: UpdateSellerDto
-    console.log("update controller, id : ",id, updateSellerDto);
-    return this.sellerService.update(id, updateSellerDto);
+    // console.log("update controller, id : ",id,files.sellerImage, updateSellerDto);
+    console.log("======================1🏠")
+    console.log("files.sellerImage","🟢", files,"🟢", updateSellerDto,"🟢");
+    console.log("======================2🏠")
+    console.log("files.sellerImage[0]","🟢", files.sellerImage[0]);
+    //console.log("files.sellerImage[0]", files.sellerImage[0]);
+ 
+ 
+      return this.sellerService.update(id,files.sellerImage[0]
+      // ,files.shopLogo
+      , updateSellerDto);
   }
 
   //@UseGuards(SessionGuard)// 🔰

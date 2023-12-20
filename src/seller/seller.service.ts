@@ -230,11 +230,23 @@ export class SellerService {
 }
 
   // 4 done 🟢🔴 // kichu field er logic add korte hobe .. kono error nai 
-  async update(id: number, updateSellerDto: UpdateSellerDto) : Promise<Seller | string>  {
-    // let seller = this.sellers.find(seller => seller.id === id);
-    // seller = {...seller, ...updateSellerDto}; // ⭕ Industry te bad practice 
+  async update(id: number,
+    sellerImage,
+    // shopLogo, 
+    updateSellerDto: UpdateSellerDto
+    ) : Promise<Seller | string>  {
     const seller = await this.findOne(id); //🟢 findOneOrFail use korte hobe ..
-    //console.log("///////////////////////////////////",seller)
+    
+    //const sellerImageFileName = sellerImage.map(sellerImage => sellerImage.filename)
+    //const shopLogoFileName = shopLogo.map(shopLogo => shopLogo.filename)
+    
+    const sellerImageFileName = sellerImage.filename;
+
+    const sellerImageFileNameString = sellerImageFileName.toString();
+    //const shopLogoFileNameString = shopLogoFileName.toString();
+
+    console.log("sellerImageFileNameString from service : 🏠 ", sellerImageFileNameString)
+
     console.log("///////////////////////////////////updateSellerDto from service : ",id,updateSellerDto)
     if(seller == undefined){
       throw new NotFoundException();
@@ -248,6 +260,9 @@ export class SellerService {
       //   seller.id = seller.id;  
          
       // }
+      if(sellerImageFileNameString){
+        seller.sellerImage = sellerImageFileNameString; 
+      }
       if(updateSellerDto.sellerName){ // check
         seller.sellerName = updateSellerDto.sellerName;
       }
@@ -255,9 +270,9 @@ export class SellerService {
         seller.sellerEmailAddress = updateSellerDto.sellerEmailAddress;
       }
   
-      if(updateSellerDto.sellerPassword){// check
-        seller.sellerPassword = updateSellerDto.sellerPassword;
-      }
+      // if(updateSellerDto.sellerPassword){// check
+      //   seller.sellerPassword = updateSellerDto.sellerPassword;
+      // }
       if(updateSellerDto.sellerPhoneNumber){ // check
         seller.sellerPhoneNumber =  updateSellerDto.sellerPhoneNumber;
       }
