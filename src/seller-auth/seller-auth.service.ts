@@ -125,6 +125,7 @@ export class SellerAuthService {
               userId : user.id,
               userName : user.sellerName,
               userEmailAddress : user.sellerEmailAddress,
+              userImage : user.sellerImage
             }
           }else{
             return null; // not sure 

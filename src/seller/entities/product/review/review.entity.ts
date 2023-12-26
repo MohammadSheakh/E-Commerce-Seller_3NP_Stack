@@ -45,7 +45,7 @@ export class Review{
 
 
    // Many Review To One 🟢Product
-    @ManyToOne(() => Seller, (seller) => seller.reviews, {onDelete:'CASCADE', eager: true},) // onDelete:'SET NULL', 
+    @ManyToOne(() => Seller, (seller) => seller.reviews, {onDelete:'CASCADE', eager: true}) // onDelete:'SET NULL', 
     sellerId  : Seller;
     //sellerId: number;
    /**

@@ -35,7 +35,7 @@ export class ReviewReply{
   updatedAt: Date; // Automatically saves the last update date and time
 
   //🟢 seller can give reviewReply many to one 
-  @ManyToOne(() => Seller, (seller) => seller.reviewReplies, {onDelete:'CASCADE'},) // onDelete:'SET NULL',
+  @ManyToOne(() => Seller, (seller) => seller.reviewReplies, {onDelete:'CASCADE', eager: true}) // onDelete:'SET NULL',
   sellerId : number; // One seller can have multiple reviewReply
 
 

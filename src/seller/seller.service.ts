@@ -262,6 +262,8 @@ export class SellerService {
       // }
       if(sellerImageFileNameString){
         seller.sellerImage = sellerImageFileNameString; 
+      }else{
+        seller.sellerImage =seller.sellerImage;
       }
       if(updateSellerDto.sellerName){ // check
         seller.sellerName = updateSellerDto.sellerName;
@@ -523,14 +525,75 @@ async getAProductsDetailsById(productId: number){
     return reviews;
   }
 
+  async getLikeDislikeStatusForReviewIdAndSellerId(reviewId, sellerId){
+    const data = await this.likeDislikeRepository.find({where:{review:{reviewId}, seller: { id: sellerId } }})
+
+    const review = await this.reviewsRepository.findOneOrFail({where:{reviewId : reviewId}});
+
+    // console.log("data 🔴🔴:",  data);
+    return data[0].type;
+    //console.log("review 🔴🔴:",  review);
+  }
+
   //🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠
-  async getAllAfterSalesReview(sellerId){
+  async getAllAfterSalesReview1(sellerId){
     //console.log("seller id from front-end from service: ", sellerId)
     // const AfterSales = "getAllAfterSalesReview";
     const reviews = await this.reviewsRepository.find({where:{sellerIdObject : sellerId, reviewCategory : ReviewCategoryEnum.AfterSalesExperience} });//{where:{sellerId : sellerId}}
     //console.log("reviews from service : ", reviews);
-    return reviews;
+
+    // ekhon review ta to ashlo .. ei review ta ei seller like korse naki dislike korse .. ei status tao niye ashte hobe .. 
+    if(reviews){
+      const reviewsWithLikeDislikeStatusForSeller =  reviews?.map( async(review:any) => {
+        let reviewID:any = review?.reviewId;
+        //const likeDislikeStatus = await this.likeDislikeRepository.find({where:{review:{reviewID}, seller: { id: sellerId } }})
+        //const likeDislikeStatus = await this.getLikeDislikeStatusForReviewIdAndSellerId(review?.reviewId, sellerId);
+        return {
+          ...review,
+         // likeDislikeStatus
+        }
+      })
+      console.log("🔴🔴🔴", reviewsWithLikeDislikeStatusForSeller)
+      return reviewsWithLikeDislikeStatusForSeller;
+    }
+
+   //return reviews;
   }
+
+  async getAllAfterSalesReview(sellerId){
+    const reviews = await this.reviewsRepository.find({
+      where: { sellerIdObject: sellerId, reviewCategory: ReviewCategoryEnum.AfterSalesExperience },
+    });
+  
+    if (reviews) {
+      const reviewsWithLikeDislikeStatusForSeller = await Promise.all(
+        reviews.map(async (review) => {
+          const likeDislikeStatus = await this.likeDislikeRepository.find({
+            where: { review: { reviewId: review.reviewId }, seller: { id: sellerId } },
+          });
+  
+          return {
+            ...review,
+            likeDislikeStatus,
+          };
+        })
+      );
+  
+      console.log("🔴🔴🔴", reviewsWithLikeDislikeStatusForSeller);
+      return reviewsWithLikeDislikeStatusForSeller;
+    }
+  }
+
+  
+    // const reviewsWithLikeDislikeStatusForSeller =  reviews?.map( async(review) => {
+    //   const likeDislikeStatus = await this.getLikeDislikeStatusForReviewIdAndSellerId(review.reviewId, sellerId);
+    //   return {
+    //     ...review,
+    //     likeDislikeStatus
+    //   }
+    // })
+   // console.log("🔴🔴🔴", reviewsWithLikeDislikeStatusForSeller)
+    //return reviewsWithLikeDislikeStatusForSeller;
 
   async deleteReviewByReviewId(reviewId){
     const review = await this.reviewsRepository.findOneOrFail({where:{reviewId : reviewId}});
@@ -540,6 +603,13 @@ async getAProductsDetailsById(productId: number){
 
 
       const deletedReview = await this.reviewsRepository.remove(review);
+      return deletedReview;
+    }
+  }
+  async deleteReplyByReplyId(replyId){
+    const review = await this.reviewRepliesRepository.findOneOrFail({where:{replyId : replyId}});
+    if(review){
+      const deletedReview = await this.reviewRepliesRepository.remove(review);
       return deletedReview;
     }
   }
@@ -553,6 +623,7 @@ async getAProductsDetailsById(productId: number){
     //}
   }
 
+  
 
   // 🏠
   async doLikeDislikeToAReview(reviewId, sellerId, likeDislikeStatusComingFromFE){
@@ -594,11 +665,7 @@ async getAProductsDetailsById(productId: number){
       console.log( reactionFromDB[0])
       if((reactionFromDB[0] == "like") && (likeDislikeStatusComingFromFE == "like")){
         console.log("change type -> normal");
-        // const data =  await this.likeDislikeRepository.save({
-        //   type: "normal",
-        //   seller:sellerId,
-        //   review : reviewId
-        // })
+        
         data.map((data) =>  {
           data.type = "normal";
           this.likeDislikeRepository.save(data);

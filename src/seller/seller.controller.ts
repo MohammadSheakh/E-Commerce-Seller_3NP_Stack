@@ -41,7 +41,7 @@ export class SellerController {
    *    -> then seller er kase notification jabe ..
    */
   @UseGuards(SessionGuard)// 🔰
-  @Get('sendEmail')
+  @Get('sendEmail') 
   sendEmail (){
     const to = "djxyz99@gmail.com";
     const emailSubject = "test1";
@@ -251,6 +251,14 @@ export class SellerController {
 
    //🏠
    @UseGuards(JwtAuthGuard)
+   @Delete('deleteReplyByReplyId/:id')
+   async deleteReplyByReplyId(@Param('id', ParseIntPipe) reviewId: number){
+    console.log("seller id from front-end from controller: ", reviewId)
+    return await this.sellerService.deleteReplyByReplyId(reviewId);
+   }
+
+   //🏠
+   @UseGuards(JwtAuthGuard)
    @Get('getReviewByReviewId/:id')
    async getReviewByReviewId(@Param('id', ParseIntPipe) reviewId: number){
     console.log("review id from front-end from controller: ", reviewId)
@@ -261,11 +269,19 @@ export class SellerController {
    //🏠
    @UseGuards(JwtAuthGuard)
    @Get('getAllAfterSalesReview/:id')
-   async getAllAfterSalesReview(@Param('id', ParseIntPipe) sellerId: number): Promise<Review[]>{
+   async getAllAfterSalesReview(@Param('id', ParseIntPipe) sellerId: number){
     console.log("seller id from front-end from controller: ", sellerId)
     return await this.sellerService.getAllAfterSalesReview(sellerId);
    }
    
+   //🏠555review
+   @UseGuards(JwtAuthGuard)
+   @Get('getLikeDislikeStatusForReviewIdAndSellerId')
+   async getLikeDislikeStatusForReviewIdAndSellerId(@Query('reviewId', ParseIntPipe) reviewId: number,  @Query('sellerId', ParseIntPipe) sellerId: number){
+    //console.log("seller id from front-end from controller: ",reviewId, sellerId)
+    return await this.sellerService.getLikeDislikeStatusForReviewIdAndSellerId(reviewId, sellerId);
+   }
+
    //🏠
    //@UseGuards(JwtAuthGuard)
    @Post('doLikeDislikeToAReview')
