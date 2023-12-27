@@ -236,16 +236,20 @@ export class SellerService {
     updateSellerDto: UpdateSellerDto
     ) : Promise<Seller | string>  {
     const seller = await this.findOne(id); //🟢 findOneOrFail use korte hobe ..
-    
-    //const sellerImageFileName = sellerImage.map(sellerImage => sellerImage.filename)
-    //const shopLogoFileName = shopLogo.map(shopLogo => shopLogo.filename)
-    
-    const sellerImageFileName = sellerImage.filename;
+    console.log("image🔰🔰🔰🔰🔰", sellerImage)
+    if(sellerImage != undefined){
+      const sellerImageFileName = sellerImage.filename;
 
-    const sellerImageFileNameString = sellerImageFileName.toString();
-    //const shopLogoFileNameString = shopLogoFileName.toString();
-
-    console.log("sellerImageFileNameString from service : 🏠 ", sellerImageFileNameString)
+      const sellerImageFileNameString = sellerImageFileName.toString();
+      if(sellerImageFileNameString){
+        seller.sellerImage = sellerImageFileNameString; 
+      }
+    }else{
+      seller.sellerImage =seller.sellerImage;
+    }
+    
+    
+    //console.log("sellerImageFileNameString from service : 🏠 ", sellerImageFileNameString)
 
     console.log("///////////////////////////////////updateSellerDto from service : ",id,updateSellerDto)
     if(seller == undefined){
@@ -260,11 +264,7 @@ export class SellerService {
       //   seller.id = seller.id;  
          
       // }
-      if(sellerImageFileNameString){
-        seller.sellerImage = sellerImageFileNameString; 
-      }else{
-        seller.sellerImage =seller.sellerImage;
-      }
+      
       if(updateSellerDto.sellerName){ // check
         seller.sellerName = updateSellerDto.sellerName;
       }
@@ -304,6 +304,88 @@ export class SellerService {
         seller.googleMapLocation = updateSellerDto.googleMapLocation;
       }
       
+      const r =  await this.sellersRepository.save(seller);
+      console.log(r);
+      return this.findOne(id); // 😥
+      // return r;
+    }else{
+      throw new HttpException(
+        {
+          status : HttpStatus.NOT_FOUND, // statusCode - 401
+          error : "Cant find that user.", // short description
+        }, 
+        HttpStatus.NOT_FOUND // 2nd argument which is status 
+        );
+    }
+    
+  }
+
+  
+
+  async updateWithOutImage(id: number,
+    
+    updateSellerDto: UpdateSellerDto
+    ) : Promise<Seller | string>  {
+    const seller = await this.findOne(id); //🟢 findOneOrFail use korte hobe ..
+   
+    
+    
+    //console.log("sellerImageFileNameString from service : 🏠 ", sellerImageFileNameString)
+
+    console.log("///////////////////////////////////updateSellerDto from service : ",id,updateSellerDto)
+    if(seller == undefined){
+      throw new NotFoundException();
+    }
+    if (seller){
+
+      // better hoito ekta object banaye .. sheta return kora .. 
+      
+
+      // if(updateSellerDto.id){
+      //   seller.id = seller.id;  
+         
+      // }
+      
+      if(updateSellerDto.sellerName){ // check
+        seller.sellerName = updateSellerDto.sellerName;
+      }
+      if(updateSellerDto.sellerEmailAddress){// check
+        seller.sellerEmailAddress = updateSellerDto.sellerEmailAddress;
+      }
+  
+      // if(updateSellerDto.sellerPassword){// check
+      //   seller.sellerPassword = updateSellerDto.sellerPassword;
+      // }
+      if(updateSellerDto.sellerPhoneNumber){ // check
+        seller.sellerPhoneNumber =  updateSellerDto.sellerPhoneNumber;
+      }
+      if(updateSellerDto.sellerDescription){ // check
+        seller.sellerDescription = updateSellerDto.sellerDescription;
+      }
+      if(updateSellerDto.shopName){
+        seller.shopName = updateSellerDto.shopName;
+      }
+      if(updateSellerDto.shopDescription){
+        seller.shopDescription = updateSellerDto.shopDescription;
+      }
+      
+      if(updateSellerDto.status){
+        seller.status = updateSellerDto.status;
+      }
+
+      if(updateSellerDto.rating){
+        seller.rating = updateSellerDto.rating;
+      }
+      
+      if(updateSellerDto.offlineShopAddress){
+        seller.offlineShopAddress = updateSellerDto.offlineShopAddress;
+      }
+      
+      if(updateSellerDto.googleMapLocation){
+        seller.googleMapLocation = updateSellerDto.googleMapLocation;
+      }
+      seller.sellerImage =seller.sellerImage;
+
       const r =  await this.sellersRepository.save(seller);
       console.log(r);
       return this.findOne(id); // 😥

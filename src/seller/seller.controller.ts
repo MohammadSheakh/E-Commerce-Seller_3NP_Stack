@@ -356,15 +356,22 @@ cb(null,Date.now()+file.originalname)
     //: UpdateSellerDto
     // console.log("update controller, id : ",id,files.sellerImage, updateSellerDto);
     console.log("======================1🏠")
-    console.log("files.sellerImage","🟢", files,"🟢", updateSellerDto,"🟢");
-    console.log("======================2🏠")
-    console.log("files.sellerImage[0]","🟢", files.sellerImage[0]);
+    console.log("updateSellerDto : 🟢", files,"🟢");
+    
     //console.log("files.sellerImage[0]", files.sellerImage[0]);
  
- 
+    if(Object.keys(files).length != 0){
       return this.sellerService.update(id,files.sellerImage[0]
-      // ,files.shopLogo
-      , updateSellerDto);
+        // ,files.shopLogo
+        , updateSellerDto);
+    }else{
+      return this.sellerService.updateWithOutImage(id,
+         updateSellerDto);
+    }
+ 
+     // return this.sellerService.update(id,files.sellerImage[0]
+     // // ,files.shopLogo
+   //   , updateSellerDto);
   }
 
   //@UseGuards(SessionGuard)// 🔰
@@ -513,6 +520,7 @@ cb(null,Date.now()+file.originalname)
   {
 
     //this.sellerService.uploadAgain(files.sellerImage,files.shopLogo, createSellerDto);
+    console.log("createdSellerDTO", createSellerDto);
     this.sellerService.uploadAgain(files.sellerImage,files.shopLogo, createSellerDto);
 
   }
