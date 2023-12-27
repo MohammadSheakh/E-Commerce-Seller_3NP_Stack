@@ -578,7 +578,6 @@ async getAProductsDetailsById(productId: number){
           };
         })
       );
-  
       console.log("🔴🔴🔴", reviewsWithLikeDislikeStatusForSeller);
       return reviewsWithLikeDislikeStatusForSeller;
     }
